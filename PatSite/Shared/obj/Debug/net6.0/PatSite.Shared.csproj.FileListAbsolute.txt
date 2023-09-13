@@ -1,0 +1,11 @@
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\bin\Debug\net6.0\PatSite.Shared.deps.json
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\bin\Debug\net6.0\PatSite.Shared.dll
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\bin\Debug\net6.0\PatSite.Shared.pdb
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\obj\Debug\net6.0\PatSite.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\obj\Debug\net6.0\PatSite.Shared.AssemblyInfoInputs.cache
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\obj\Debug\net6.0\PatSite.Shared.AssemblyInfo.cs
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\obj\Debug\net6.0\PatSite.Shared.csproj.CoreCompileInputs.cache
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\obj\Debug\net6.0\PatSite.Shared.dll
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\obj\Debug\net6.0\refint\PatSite.Shared.dll
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\obj\Debug\net6.0\PatSite.Shared.pdb
+C:\Users\w136597\source\repos\PatAPI\PatSite\Shared\obj\Debug\net6.0\ref\PatSite.Shared.dll
