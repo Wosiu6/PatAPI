@@ -21,7 +21,7 @@ namespace PatAPI.Handlers
             {
                 var query = HttpUtility.ParseQueryString(request.RequestUri!.Query);
 
-                key = query["gameId"];
+                key = query["gameId"] ?? "buildId";
             }
 
             string? cached = _cache.Get<Task<string>?>(key)?.Result;

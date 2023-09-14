@@ -1,8 +1,8 @@
 ﻿using Infrastructure.Constants;
-using SAM.Models.HLTB;
+using Infrastructure.Models.HLTB;
 using System.Text.Json;
 using System.Text;
-using Infrastructure.Models.HTLB;
+using Infrastructure.Models.HLTB._next;
 
 namespace PatAPI.Clients
 {
@@ -45,8 +45,27 @@ namespace PatAPI.Clients
         {
             HttpClient client = _httpClientFactory.CreateClient(HowLongToBeatConstants.ClientName);
 
-            return await client.GetFromJsonAsync<SingleGameResponse>(string.Format(HowLongToBeatConstants.ApiSingleGameFormattablePath, gameId)); //TODO: fix Json Objects
+            string buildId = await GetBuildId();
+            string url = string.Format(HowLongToBeatConstants.ApiSingleGameFormattablePath, buildId, gameId);
 
+            return await client.GetFromJsonAsync<SingleGameResponse>(url);
+        }
+
+        public async Task<string> GetBuildId()
+        {
+            HttpClient client = _httpClientFactory.CreateClient(HowLongToBeatConstants.ClientName);
+
+            string? response = await client.GetStringAsync(client.BaseAddress);
+
+            string stringToFind = "buildId";
+
+            int indexOfBuild = response.IndexOf(stringToFind);
+            int startingIndex = response.IndexOf($"\"", indexOfBuild + stringToFind.Length + 1) + 1;
+            int endingIndex = response.IndexOf($"\"", startingIndex + 1);
+
+            string buildId = response[startingIndex..endingIndex];
+
+            return buildId;
         }
     }
 }

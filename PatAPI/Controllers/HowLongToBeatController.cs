@@ -57,5 +57,19 @@ namespace PatAPI.Controllers
                 return NotFound("Game not found.");
             }
         }
+        
+        [HttpGet("getBuildId")]
+        public async Task<IActionResult> GetBuildId()
+        {
+            try
+            {
+                return Ok(await _hltbService.GetBuildId());
+            }
+            catch (Exception e)
+            {
+                _logger.Log(0, e, e.Message);
+                return NotFound("Game not found.");
+            }
+        }
     }
 }

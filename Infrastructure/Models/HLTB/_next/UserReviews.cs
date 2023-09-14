@@ -1,20 +1,20 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Infrastructure.Models.HTLB
+﻿namespace Infrastructure.Models.HLTB._next
 {
+    using System.Text.Json.Serialization;
+
     public class UserReviews
     {
         [JsonPropertyName("5")]
         public object? _5 { get; set; }
 
         [JsonPropertyName("10")]
-        public string? _10 { get; set; }
+        public object? _10 { get; set; }
 
         [JsonPropertyName("15")]
         public object? _15 { get; set; }
 
         [JsonPropertyName("20")]
-        public string? _20 { get; set; }
+        public object? _20 { get; set; }
 
         [JsonPropertyName("25")]
         public object? _25 { get; set; }
@@ -32,7 +32,7 @@ namespace Infrastructure.Models.HTLB
         public object? _45 { get; set; }
 
         [JsonPropertyName("50")]
-        public object? _50 { get; set; }
+        public string? _50 { get; set; }
 
         [JsonPropertyName("55")]
         public object? _55 { get; set; }
@@ -41,13 +41,13 @@ namespace Infrastructure.Models.HTLB
         public string? _60 { get; set; }
 
         [JsonPropertyName("65")]
-        public object? _65 { get; set; }
+        public string? _65 { get; set; }
 
         [JsonPropertyName("70")]
         public string? _70 { get; set; }
 
         [JsonPropertyName("75")]
-        public string?   _75 { get; set; }
+        public string? _75 { get; set; }
 
         [JsonPropertyName("80")]
         public string? _80 { get; set; }
@@ -67,4 +67,5 @@ namespace Infrastructure.Models.HTLB
         [JsonPropertyName("review_count")]
         public int? ReviewCount { get; set; }
     }
+
 }

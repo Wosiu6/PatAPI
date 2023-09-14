@@ -1,7 +1,7 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Infrastructure.Models.HTLB
+﻿namespace Infrastructure.Models.HLTB._next
 {
+    using System.Text.Json.Serialization;
+
     public class PageMetadata
     {
         [JsonPropertyName("title")]
