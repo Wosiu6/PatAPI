@@ -1,5 +1,4 @@
 using Infrastructure.Constants;
-using PatAPI.Clients;
 using PatAPI.Handlers;
 using PatAPI.Services;
 

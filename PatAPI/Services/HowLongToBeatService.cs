@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Models.Exceptions;
+using Infrastructure.Models.HTLB;
 using PatAPI.Clients;
-using SAM.Game.HLTB;
+using SAM.Models.HLTB;
 
 namespace PatAPI.Services
 {
@@ -13,14 +14,19 @@ namespace PatAPI.Services
             _client = new HowLongToBeatClient(httpClientFactory);
         }
 
-        public async Task<GamesSearchResponse?> FindGamesByName(string gameName)
+        public async Task<SingleGameResponse?> GetGameById(string gameId)
         {
-            return await _client.SearchGameByName(gameName);
+            return await _client.GetGameById(gameId);
+        }
+
+        public async Task<GamesSearchResponse?> SearchGamesByName(string gameName)
+        {
+            return await _client.SearchGamesByName(gameName);
         }
 
         public async Task<GameSearchResponse?> GetGameByName(string gameName)
         {
-            GamesSearchResponse? games = await _client.SearchGameByName(gameName);
+            GamesSearchResponse? games = await _client.SearchGamesByName(gameName);
 
             if (games is not null)
             {

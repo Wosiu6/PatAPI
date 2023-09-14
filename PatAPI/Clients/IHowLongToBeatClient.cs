@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using SAM.Game.HLTB;
+﻿using Infrastructure.Models.HTLB;
+using SAM.Models.HLTB;
 
 namespace PatAPI.Clients
 {
     public interface IHowLongToBeatClient
     {
-        
-
-        public abstract Task<GamesSearchResponse?> SearchGameByName(string gameName);
+        public abstract Task<SingleGameResponse?> GetGameById(string gameId);
+        public abstract Task<GamesSearchResponse?> SearchGamesByName(string gameName);
     }
 }

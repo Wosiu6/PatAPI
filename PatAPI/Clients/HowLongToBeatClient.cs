@@ -1,7 +1,8 @@
 ﻿using Infrastructure.Constants;
-using SAM.Game.HLTB;
+using SAM.Models.HLTB;
 using System.Text.Json;
 using System.Text;
+using Infrastructure.Models.HTLB;
 
 namespace PatAPI.Clients
 {
@@ -16,13 +17,13 @@ namespace PatAPI.Clients
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<GamesSearchResponse?> SearchGameByName(string gameName)
+        public async Task<GamesSearchResponse?> SearchGamesByName(string gameName)
         {
             HttpClient client = _httpClientFactory.CreateClient(HowLongToBeatConstants.ClientName);
 
             StringContent content = GenerateStringContentFromGameName(gameName);
 
-            HttpResponseMessage response = await client.PostAsync("api/search", content);
+            HttpResponseMessage response = await client.PostAsync(HowLongToBeatConstants.ApiSearchPath, content);
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<GamesSearchResponse>();
@@ -38,6 +39,14 @@ namespace PatAPI.Clients
             var jsonBody = JsonSerializer.Serialize(requestData);
 
             return new StringContent(jsonBody, Encoding.UTF8, JsonContentType);
+        }
+
+        public async Task<SingleGameResponse?> GetGameById(string gameId)
+        {
+            HttpClient client = _httpClientFactory.CreateClient(HowLongToBeatConstants.ClientName);
+
+            return await client.GetFromJsonAsync<SingleGameResponse>(string.Format(HowLongToBeatConstants.ApiSingleGameFormattablePath, gameId)); //TODO: fix Json Objects
+
         }
     }
 }

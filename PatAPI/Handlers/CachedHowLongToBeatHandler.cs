@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System.Net;
+using System.Web;
 
 namespace PatAPI.Handlers
 {
@@ -14,9 +15,16 @@ namespace PatAPI.Handlers
 
         protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            string? gameName = request.Content?.ReadAsStringAsync(cancellationToken).Result;
+            string? key = request.Content?.ReadAsStringAsync(cancellationToken).Result;
 
-            string? cached = _cache.Get<Task<string>?>(gameName)?.Result;
+            if (key is null)
+            {
+                var query = HttpUtility.ParseQueryString(request.RequestUri!.Query);
+
+                key = query["gameId"];
+            }
+
+            string? cached = _cache.Get<Task<string>?>(key)?.Result;
 
             if (cached is not null)
             {
@@ -29,7 +37,7 @@ namespace PatAPI.Handlers
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
             Task<string>? content = response.Content.ReadAsStringAsync(cancellationToken);
 
-            await _cache.Set(gameName, content, TimeSpan.FromHours(1));
+            await _cache.Set(key, content, TimeSpan.FromHours(1));
 
             return response;
         }
