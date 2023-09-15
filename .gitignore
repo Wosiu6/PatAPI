@@ -1,7 +1,6 @@
-*.v2
-*.vsidx
-*.suo
-*.bin
-*.dll
-*.pdb
-*.cache
+PatAPI/DesignTimeBuild/
+PatAPI/FileContentIndex/
+PatAPI/v17/
+PatAPI/ProjectSettings.json
+PatAPI/slnx.sqllite
+PatAPI/VSWorkspaceState.json

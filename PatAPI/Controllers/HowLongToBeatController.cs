@@ -17,58 +17,31 @@ namespace PatAPI.Controllers
         }
 
         [HttpPost("getByName/{gameName}")]
-        public async Task<IActionResult> GetGameByName(string gameName)
-        {
-            try
-            {
-                return Ok(await _hltbService.GetGameByName(gameName));
-            }
-            catch (Exception e)
-            {
-                _logger.Log(0, e, e.Message);
-                return NotFound("Game not found.");
-            }
-        }
+        public Task<IActionResult> GetGameByName(string gameName) =>
+            HandleRequest(async () => Ok(await _hltbService.GetGameByName(gameName)), "Game not found.");
 
         [HttpPost("search/{gameName}")]
-        public async Task<IActionResult> GetGamesByName(string gameName)
-        {
-            try
-            {
-                return Ok(await _hltbService.SearchGamesByName(gameName));
-            }
-            catch (Exception e)
-            {
-                _logger.Log(0, e, e.Message);
-                return NotFound("Game not found.");
-            }
-        }
-        
+        public Task<IActionResult> GetGamesByName(string gameName) =>
+            HandleRequest(async () => Ok(await _hltbService.SearchGamesByName(gameName)), "Games not found.");
+
         [HttpGet("getById/{gameId}")]
-        public async Task<IActionResult> GetGameById(string gameId)
-        {
-            try
-            {
-                return Ok(await _hltbService.GetGameById(gameId));
-            }
-            catch (Exception e)
-            {
-                _logger.Log(0, e, e.Message);
-                return NotFound("Game not found.");
-            }
-        }
-        
+        public Task<IActionResult> GetGameById(string gameId) =>
+            HandleRequest(async () => Ok(await _hltbService.GetGameById(gameId)), "Game not found.");
+
         [HttpGet("getBuildId")]
-        public async Task<IActionResult> GetBuildId()
+        public Task<IActionResult> GetBuildId() =>
+            HandleRequest(async () => Ok(await _hltbService.GetBuildId()), "Build Id could not be retrieved.");
+
+        private async Task<IActionResult> HandleRequest(Func<Task<IActionResult>> action, string errorMessage)
         {
             try
             {
-                return Ok(await _hltbService.GetBuildId());
+                return await action.Invoke();
             }
             catch (Exception e)
             {
-                _logger.Log(0, e, e.Message);
-                return NotFound("Game not found.");
+                _logger.LogError(e, errorMessage);
+                return NotFound(errorMessage);
             }
         }
     }

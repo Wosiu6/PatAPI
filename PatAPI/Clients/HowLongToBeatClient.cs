@@ -60,12 +60,19 @@ namespace PatAPI.Clients
             string stringToFind = "buildId";
 
             int indexOfBuild = response.IndexOf(stringToFind);
-            int startingIndex = response.IndexOf($"\"", indexOfBuild + stringToFind.Length + 1) + 1;
-            int endingIndex = response.IndexOf($"\"", startingIndex + 1);
 
-            string buildId = response[startingIndex..endingIndex];
+            if (indexOfBuild != -1)
+            {
+                int startingIndex = response.IndexOf('"', indexOfBuild + stringToFind.Length + 1) + 1;
+                int endingIndex = response.IndexOf('"', startingIndex + 1);
 
-            return buildId;
+                if (startingIndex != -1 && endingIndex != -1)
+                {
+                    return response[startingIndex..endingIndex];
+                }
+            }
+
+            throw new InvalidOperationException("Build ID not found in the response.");
         }
     }
 }

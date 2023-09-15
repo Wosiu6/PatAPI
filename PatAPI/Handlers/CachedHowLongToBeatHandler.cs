@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Specialized;
 using System.Net;
 using System.Web;
 
@@ -13,33 +14,39 @@ namespace PatAPI.Handlers
             _cache = cache;
         }
 
-        protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            string? key = request.Content?.ReadAsStringAsync(cancellationToken).Result;
+            //TODO write a separate handler for each HLTB action to make this cleaner (if the need arises)
+            string key = GetCacheKey(request);
 
-            if (key is null)
-            {
-                var query = HttpUtility.ParseQueryString(request.RequestUri!.Query);
-
-                key = query["gameId"] ?? "buildId";
-            }
-
-            string? cached = _cache.Get<Task<string>?>(key)?.Result;
-
-            if (cached is not null)
+            if (_cache.TryGetValue(key, out Task<string>? cachedContent) && cachedContent != null)
             {
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(cached)
+                    Content = new StringContent(await cachedContent)
                 };
             }
 
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
-            Task<string>? content = response.Content.ReadAsStringAsync(cancellationToken);
 
-            await _cache.Set(key, content, TimeSpan.FromHours(1));
+            if (response.IsSuccessStatusCode)
+            {
+                Task<string> content = response.Content.ReadAsStringAsync(cancellationToken);
+                await _cache.Set(key, content, TimeSpan.FromHours(1));
+            }
 
             return response;
+        }
+
+        private string GetCacheKey(HttpRequestMessage request)
+        {
+            if (request.Content != null)
+            {
+                return request.Content.ReadAsStringAsync().Result;
+            }
+
+            var query = HttpUtility.ParseQueryString(request.RequestUri?.Query ?? "");
+            return query["gameId"] ?? "buildId";
         }
     }
 }

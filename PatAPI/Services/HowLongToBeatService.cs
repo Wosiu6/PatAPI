@@ -31,22 +31,13 @@ namespace PatAPI.Services
         {
             GamesSearchResponse? games = await _client.SearchGamesByName(gameName);
 
-            if (games is not null)
+            if (games?.GameSearchResponse?.Count > 0)
             {
-                GameSearchResponse? gameSearchResponse = games.GameSearchResponse?.FirstOrDefault();
-
-                if (gameSearchResponse is not null)
-                {
-                    return gameSearchResponse;
-                }
-                else
-                {
-                    throw new GameNotFoundExcpetion();
-                }
+                return games.GameSearchResponse[0];
             }
             else
             {
-                throw new GameNotFoundExcpetion();
+                throw new GameNotFoundException();
             }
         }
 
