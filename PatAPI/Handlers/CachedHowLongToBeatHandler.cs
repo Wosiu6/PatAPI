@@ -38,7 +38,7 @@ namespace PatAPI.Handlers
             return response;
         }
 
-        private string GetCacheKey(HttpRequestMessage request)
+        private static string GetCacheKey(HttpRequestMessage request)
         {
             if (request.Content != null)
             {
