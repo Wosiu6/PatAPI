@@ -1,17 +1,20 @@
 ﻿using Infrastructure.Models.Exceptions;
-using Infrastructure.Models.HTLB;
+using Infrastructure.Models.HLTB;
+using Infrastructure.Models.HLTB._next;
+using Microsoft.Extensions.Caching.Memory;
 using PatAPI.Clients;
-using SAM.Models.HLTB;
 
 namespace PatAPI.Services
 {
     public class HowLongToBeatService : IHowLongToBeatService
     {
         private readonly HowLongToBeatClient _client;
+        private readonly IMemoryCache _cache;
 
-        public HowLongToBeatService(IHttpClientFactory httpClientFactory)
+        public HowLongToBeatService(IHttpClientFactory httpClientFactory, IMemoryCache cache)
         {
             _client = new HowLongToBeatClient(httpClientFactory);
+            _cache = cache;
         }
 
         public async Task<SingleGameResponse?> GetGameById(string gameId)
@@ -28,22 +31,27 @@ namespace PatAPI.Services
         {
             GamesSearchResponse? games = await _client.SearchGamesByName(gameName);
 
-            if (games is not null)
+            if (games?.GameSearchResponse?.Count > 0)
             {
-                GameSearchResponse? gameSearchResponse = games.GameSearchResponse?.FirstOrDefault();
-
-                if (gameSearchResponse is not null)
-                {
-                    return gameSearchResponse;
-                }
-                else
-                {
-                    throw new GameNotFoundExcpetion();
-                }
+                return games.GameSearchResponse[0];
             }
             else
             {
-                throw new GameNotFoundExcpetion();
+                throw new GameNotFoundException();
+            }
+        }
+
+        public async Task<string?> GetBuildId()
+        {
+            try
+            {
+                return await _client.GetBuildId();
+            }
+            catch
+            {
+                _cache.Remove("buildId");
+
+                return await _client.GetBuildId();
             }
         }
     }

@@ -1,8 +1,5 @@
-﻿using System.Text.RegularExpressions;
-using System.Text;
-using System.Text.Json;
-using SAM.Models.HLTB;
-using Infrastructure.Models.HTLB;
+﻿using Infrastructure.Models.HLTB;
+using Infrastructure.Models.HLTB._next;
 
 namespace PatAPI.Services
 {
@@ -11,5 +8,6 @@ namespace PatAPI.Services
         public abstract Task<GameSearchResponse?> GetGameByName(string gameName);
         public abstract Task<SingleGameResponse?> GetGameById(string gameName);
         public abstract Task<GamesSearchResponse?> SearchGamesByName(string gameName);
+        public abstract Task<string?> GetBuildId();
     }
 }

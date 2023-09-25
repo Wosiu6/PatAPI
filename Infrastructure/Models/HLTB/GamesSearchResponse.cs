@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace SAM.Models.HLTB
+namespace Infrastructure.Models.HLTB
 {
     public class GameSearchResponse
     {

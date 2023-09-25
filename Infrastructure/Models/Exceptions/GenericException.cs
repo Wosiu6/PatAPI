@@ -22,9 +22,9 @@ namespace Infrastructure.Models.Exceptions
         }
     }
 
-    public class GameNotFoundExcpetion : GenericException
+    public class GameNotFoundException : GenericException
     {
-        public GameNotFoundExcpetion() : base("Game not Found")
+        public GameNotFoundException() : base("Game not Found")
         {
         }
     }

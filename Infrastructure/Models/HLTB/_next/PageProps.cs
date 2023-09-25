@@ -1,11 +1,12 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Infrastructure.Models.HTLB
+﻿namespace Infrastructure.Models.HLTB._next
 {
+    using System.Collections.Generic;
+    using System.Text.Json.Serialization;
+
     public class PageProps
     {
         [JsonPropertyName("game")]
-        public GameData? Game { get; set; }
+        public Game? Game { get; set; }
 
         [JsonPropertyName("ignWikiSlug")]
         public string? IgnWikiSlug { get; set; }

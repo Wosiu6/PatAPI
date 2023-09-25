@@ -1,8 +1,8 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Infrastructure.Models.HTLB
+﻿namespace Infrastructure.Models.HLTB._next
 {
-    public class PlatformData
+    using System.Text.Json.Serialization;
+
+    public class PlatformDatum
     {
         [JsonPropertyName("platform")]
         public string? Platform { get; set; }
@@ -28,4 +28,5 @@ namespace Infrastructure.Models.HTLB
         [JsonPropertyName("comp_high")]
         public int? CompHigh { get; set; }
     }
+
 }

@@ -1,7 +1,8 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Infrastructure.Models.HTLB
+﻿namespace Infrastructure.Models.HLTB._next
 {
+    using System.Collections.Generic;
+    using System.Text.Json.Serialization;
+
     public class IgnMap
     {
         [JsonPropertyName("__typename")]
@@ -26,7 +27,7 @@ namespace Infrastructure.Models.HTLB
         public int? Width { get; set; }
 
         [JsonPropertyName("height")]
-        public int? Height { get; set; }
+        public double? Height { get; set; }
 
         [JsonPropertyName("minZoom")]
         public int? MinZoom { get; set; }
