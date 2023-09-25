@@ -1,80 +1,77 @@
 ﻿@page "/ballsimulation"
 
+@using AvnCanvasHelper;
 @using Blazor.Extensions
 @using Blazor.Extensions.Canvas
 @using Blazor.Extensions.Canvas.Canvas2D
-@using Microsoft.JSInterop;
 @using Infrastructure.Models.Physics;
+@using System.Drawing;
 
-@inject IJSRuntime JsRuntime;
+<CanvasHelper @ref="CanvasHelper"
+              CanvasResized="CanvasResized"
+              RenderFrame="RenderFrame"
+              MouseDown="MouseDown"
+              MouseUp="MouseUp"
+              MouseMove="MouseMove">
 
-<div id="canvasHolder" style="position: fixed">
-    <BECanvas Width="1000" Height="1000" @ref="CanvasRef"></BECanvas>
-</div>
+    <BECanvas Width="600" Height="400" @ref="CanvasReference"></BECanvas>
 
-<script src='_content/Blazor.Extensions.Canvas/blazor.extensions.canvas.js'></script>
-<script>
-    function renderJS(timeStamp) {
-        theInstance.invokeMethodAsync('RenderInBlazor', timeStamp);
-        window.requestAnimationFrame(renderJS);
-    }
-
-    function resizeCanvasToFitWindow() {
-        var holder = document.getElementById('canvasHolder');
-        var canvas = holder.querySelector('canvas');
-        if (canvas) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            theInstance.invokeMethodAsync('ResizeInBlazor', canvas.width, canvas.height);
-        }
-    }
-
-    window.initRenderJS = (instance) => {
-        window.theInstance = instance;
-        window.addEventListener("resize", resizeCanvasToFitWindow);
-        resizeCanvasToFitWindow();
-        window.requestAnimationFrame(renderJS);
-    };
-</script>
+</CanvasHelper>
 
 @code{
     private Canvas BallField = new Canvas();
-    private Canvas2DContext? ctx;
-    protected BECanvasComponent? CanvasRef;
+    private Size Size = new Size();
+    private Canvas2DContext ctx;
+    private BECanvasComponent CanvasReference;
+    private CanvasHelper CanvasHelper;
+    private double FPS;
     private DateTime LastRender;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        this.ctx = await CanvasRef.CreateCanvas2DAsync();
-        await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
-        await base.OnInitializedAsync();
+        if (firstRender)
+        {
+            // Create the canvas and context
+            ctx = await CanvasReference.CreateCanvas2DAsync();
+            // Initialize the helper
+            await CanvasHelper.Initialize();
+        }
     }
 
-    [JSInvokable]
-    public void ResizeInBlazor(double width, double height) => BallField.Resize(width, height);
-
-    [JSInvokable]
-    public async ValueTask RenderInBlazor(float timeStamp)
+    public async Task RenderFrame(double fps)
     {
-        if (BallField.Balls.Count == 0)
-            BallField.AddRandomBalls(1);
-        BallField.StepForward();
+        FPS = fps;
 
-        double fps = 1.0 / (DateTime.Now - LastRender).TotalSeconds;
-        LastRender = DateTime.Now;
+        foreach (Ball ball in BallField.Balls)
+        {
+            ball.Move60Fps(BallField.Width, BallField.Height);
+        }
 
         await this.ctx.BeginBatchAsync();
+
+        await UpdateBackground();
+
+        await UpdateBalls();
+
+        await this.ctx.EndBatchAsync();
+    }
+
+    private async Task UpdateBackground()
+    {
         await this.ctx.ClearRectAsync(0, 0, BallField.Width, BallField.Height);
         await this.ctx.SetFillStyleAsync("#003366");
         await this.ctx.FillRectAsync(0, 0, BallField.Width, BallField.Height);
         await this.ctx.SetFontAsync("26px Segoe UI");
         await this.ctx.SetFillStyleAsync("#FFFFFF");
-        await this.ctx.FillTextAsync("Blazor WebAssembly + HTML Canvas", 10, 30);
+        await this.ctx.FillTextAsync("Pat inefficient blazor ball simulation in HTML Canvas", 10, 30);
         await this.ctx.SetFontAsync("16px consolas");
-        await this.ctx.FillTextAsync($"FPS: {fps:0.000}", 10, 50);
+        await this.ctx.FillTextAsync($"FPS: {FPS:0.000}", 10, 50);
         await this.ctx.SetStrokeStyleAsync("#FFFFFF");
-        
-        foreach (var ball in BallField.Balls)
+    }
+
+    private async Task UpdateBalls()
+    {
+        foreach (Ball ball in BallField.Balls)
         {
             await this.ctx.BeginPathAsync();
             await this.ctx.ArcAsync(ball.X, ball.Y, ball.Radius, 0, 2 * Math.PI, false);
@@ -82,7 +79,33 @@
             await this.ctx.FillAsync();
             await this.ctx.StrokeAsync();
         }
+    }
 
-        await this.ctx.EndBatchAsync();
+    /// <summary>
+    /// Called by CanvasHelper whenever the browser is resized.
+    /// </summary>
+    /// <param name="size"></param>
+    public void CanvasResized(Size size)
+    {
+        Size = size;
+        BallField.Resize(size.Width, size.Height);
+    }
+
+    // Handle mouse down events
+    void MouseDown(CanvasMouseArgs args)
+    {
+
+    }
+
+    // Handle mouse up events
+    void MouseUp(CanvasMouseArgs args)
+    {
+
+    }
+
+    // Handle mouse move events
+    void MouseMove(CanvasMouseArgs args)
+    {
+
     }
 }
