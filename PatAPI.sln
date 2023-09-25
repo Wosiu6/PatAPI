@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatAPI", "PatAPI\PatAPI.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{0943A7E8-68CF-4359-837B-E6565060DB28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatSite.Server", "PatSite\Server\PatSite.Server.csproj", "{2E4F0FBD-EB22-4AB5-8CBD-CC23677B948D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatSite.Server", "PatSite\Server\PatSite.Server.csproj", "{2E4F0FBD-EB22-4AB5-8CBD-CC23677B948D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatSite.Client", "PatSite\Client\PatSite.Client.csproj", "{F1B225A5-EA74-48B8-B91E-1F963F6AEA8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatSite.Client", "PatSite\Client\PatSite.Client.csproj", "{F1B225A5-EA74-48B8-B91E-1F963F6AEA8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatSite.Shared", "PatSite\Shared\PatSite.Shared.csproj", "{03AAF300-69B9-4DC4-88CD-D84ED671E307}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatSite.Shared", "PatSite\Shared\PatSite.Shared.csproj", "{03AAF300-69B9-4DC4-88CD-D84ED671E307}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
