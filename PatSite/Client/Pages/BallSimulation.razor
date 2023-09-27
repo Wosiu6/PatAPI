@@ -14,13 +14,12 @@
               MouseUp="MouseUp"
               MouseMove="MouseMove">
 
-    <BECanvas Width="600" Height="400" @ref="CanvasReference"></BECanvas>
+    <BECanvas @ref="CanvasReference"></BECanvas>
 
 </CanvasHelper>
 
 @code{
     private Canvas BallField = new Canvas();
-    private Size Size = new Size();
     private Canvas2DContext ctx;
     private BECanvasComponent CanvasReference;
     private CanvasHelper CanvasHelper;
@@ -66,19 +65,20 @@
         await this.ctx.FillTextAsync("Pat inefficient blazor ball simulation in HTML Canvas", 10, 30);
         await this.ctx.SetFontAsync("16px consolas");
         await this.ctx.FillTextAsync($"FPS: {FPS:0.000}", 10, 50);
-        await this.ctx.SetStrokeStyleAsync("#FFFFFF");
     }
 
     private async Task UpdateBalls()
     {
         foreach (Ball ball in BallField.Balls)
         {
+            await this.ctx.SetStrokeStyleAsync("#FF0000");
             await this.ctx.BeginPathAsync();
             await this.ctx.ArcAsync(ball.X, ball.Y, ball.Radius, 0, 2 * Math.PI, false);
             await this.ctx.SetFillStyleAsync(ball.Color);
             await this.ctx.FillAsync();
             await this.ctx.StrokeAsync();
         }
+        CanvasResized(Size);
     }
 
     /// <summary>
@@ -87,14 +87,13 @@
     /// <param name="size"></param>
     public void CanvasResized(Size size)
     {
-        Size = size;
-        BallField.Resize(size.Width, size.Height);
+        BallField.Resize(size.Width * 0.6, size.Height * 0.6);
     }
 
     // Handle mouse down events
     void MouseDown(CanvasMouseArgs args)
     {
-
+        BallField.AddRandmBall();
     }
 
     // Handle mouse up events
