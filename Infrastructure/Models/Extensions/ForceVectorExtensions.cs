@@ -11,8 +11,8 @@ namespace Infrastructure.Models.Extensions
     {
         public static void Add(this ForceVector originalVector, ForceVector newVector)
         {
-            originalVector.X += newVector.X;
-            originalVector.Y += newVector.Y;
+            originalVector.X += newVector.X * BallMovementConstants.TimeStep;
+            originalVector.Y += newVector.Y * BallMovementConstants.TimeStep;
         }
     }
 }

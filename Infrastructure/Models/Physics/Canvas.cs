@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Utils;
+using System;
 
 namespace Infrastructure.Models.Physics
 {
@@ -10,18 +11,6 @@ namespace Infrastructure.Models.Physics
 
         public Canvas()
         {
-            Random rand = new();
-
-            double xVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
-            double yVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
-
-            Balls.Add(new Ball(
-                1,
-                Height,
-                new ForceVector(xVel, yVel),
-                radius: rand.NextInt64(5, 15),
-                color: DrawingUtils.GenerateRandomColor().ToString()
-            ));
         }
 
         public void Resize(double width, double height) =>
@@ -29,7 +18,26 @@ namespace Infrastructure.Models.Physics
 
         private double RandomVelocity(Random rand, double min, double max)
         {
-            return min + (max - min) * rand.NextDouble();
+            return rand.NextDouble() * (max - min) + min;
+        }
+
+        public void AddRandmBall()
+        {
+            Random rand = new();
+
+            double xVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
+            //double yVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
+
+            long radius = rand.NextInt64(5, 15);
+
+            Balls.Add(new Ball(
+                radius,
+                Height - radius,
+                new ForceVector(xVel, 0),
+                radius: radius,
+                color: "#FF0000"
+            //color: DrawingUtils.GenerateRandomColor().ToString()
+            ));
         }
     }
 }
