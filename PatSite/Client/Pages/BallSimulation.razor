@@ -6,6 +6,16 @@
 @using Blazor.Extensions.Canvas.Canvas2D
 @using Infrastructure.Models.Physics;
 @using System.Drawing;
+@using PatSite.Server.Models;
+
+<LayoutView>
+    <EditForm Model="@Model">
+        Time Step: <InputNumber DisplayName="Time Step" @bind-Value=Model!.TimeStep />
+        Min Speed: <InputNumber DisplayName="Minimum Speed" @bind-Value=Model!.MinimumSpeed />
+        Max Speed: <InputNumber DisplayName="Maximum Speed" @bind-Value=Model!.MaximumSpeed />
+    </EditForm>
+    <button @onclick="ClearBalls">Clear Rolling Balls</button>
+</LayoutView>
 
 <CanvasHelper @ref="CanvasHelper"
               CanvasResized="CanvasResized"
@@ -20,18 +30,23 @@
 
 @code{
     private Canvas BallField = new Canvas();
-    private Canvas2DContext ctx;
+    private Canvas2DContext canvasContext;
     private BECanvasComponent CanvasReference;
     private CanvasHelper CanvasHelper;
+    private Size Size = new Size();
     private double FPS;
     private DateTime LastRender;
+
+    public ConstantsChangeModel? Model;
+
+    protected override void OnInitialized() => Model ??= new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             // Create the canvas and context
-            ctx = await CanvasReference.CreateCanvas2DAsync();
+            canvasContext = await CanvasReference.CreateCanvas2DAsync();
             // Initialize the helper
             await CanvasHelper.Initialize();
         }
@@ -46,37 +61,56 @@
             ball.Move60Fps(BallField.Width, BallField.Height);
         }
 
-        await this.ctx.BeginBatchAsync();
 
         await UpdateBackground();
 
         await UpdateBalls();
 
-        await this.ctx.EndBatchAsync();
+        await ClearOutterBackground();
+
     }
 
     private async Task UpdateBackground()
     {
-        await this.ctx.ClearRectAsync(0, 0, BallField.Width, BallField.Height);
-        await this.ctx.SetFillStyleAsync("#003366");
-        await this.ctx.FillRectAsync(0, 0, BallField.Width, BallField.Height);
-        await this.ctx.SetFontAsync("26px Segoe UI");
-        await this.ctx.SetFillStyleAsync("#FFFFFF");
-        await this.ctx.FillTextAsync("Pat inefficient blazor ball simulation in HTML Canvas", 10, 30);
-        await this.ctx.SetFontAsync("16px consolas");
-        await this.ctx.FillTextAsync($"FPS: {FPS:0.000}", 10, 50);
+        await this.canvasContext.BeginBatchAsync();
+
+        await this.canvasContext.ClearRectAsync(0, 0, BallField.Width, BallField.Height);
+        await this.canvasContext.SetFillStyleAsync("#003366");
+        await this.canvasContext.FillRectAsync(0, 0, BallField.Width, BallField.Height);
+        await this.canvasContext.SetFontAsync("26px Segoe UI");
+        await this.canvasContext.SetFillStyleAsync("#FFFFFF");
+        await this.canvasContext.FillTextAsync("Pat ball simulation in HTML Canvas", 10, 30);
+        await this.canvasContext.SetFontAsync("16px consolas");
+        await this.canvasContext.FillTextAsync($"FPS: {FPS:0.000}", 10, 50);
+
+        await this.canvasContext.EndBatchAsync();
+    }
+
+    private async Task ClearOutterBackground()
+    {
+        await this.canvasContext.BeginBatchAsync();
+
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, -BallField.Width, 15);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, 15, -BallField.Height);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, 15, 15);
+
+        await this.canvasContext.EndBatchAsync();
     }
 
     private async Task UpdateBalls()
     {
         foreach (Ball ball in BallField.Balls)
         {
-            await this.ctx.SetStrokeStyleAsync("#FF0000");
-            await this.ctx.BeginPathAsync();
-            await this.ctx.ArcAsync(ball.X, ball.Y, ball.Radius, 0, 2 * Math.PI, false);
-            await this.ctx.SetFillStyleAsync(ball.Color);
-            await this.ctx.FillAsync();
-            await this.ctx.StrokeAsync();
+            await this.canvasContext.BeginBatchAsync();
+
+            await this.canvasContext.SetStrokeStyleAsync("#FF0000");
+            await this.canvasContext.BeginPathAsync();
+            await this.canvasContext.ArcAsync(ball.X, ball.Y, ball.Radius, 0, 2 * Math.PI, false);
+            await this.canvasContext.SetFillStyleAsync(ball.Color);
+            await this.canvasContext.FillAsync();
+            await this.canvasContext.StrokeAsync();
+
+            await this.canvasContext.EndBatchAsync();
         }
         CanvasResized(Size);
     }
@@ -87,6 +121,7 @@
     /// <param name="size"></param>
     public void CanvasResized(Size size)
     {
+        Size = size;
         BallField.Resize(size.Width * 0.6, size.Height * 0.6);
     }
 
@@ -106,5 +141,10 @@
     void MouseMove(CanvasMouseArgs args)
     {
 
+    }
+
+    private async Task ClearBalls()
+    {
+        BallField.Balls.RemoveAll(b => b.IsRolling);
     }
 }

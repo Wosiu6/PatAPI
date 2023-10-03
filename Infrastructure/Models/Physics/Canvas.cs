@@ -26,14 +26,12 @@ namespace Infrastructure.Models.Physics
             Random rand = new();
 
             double xVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
-            //double yVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
+            double yVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
 
             long radius = rand.NextInt64(5, 15);
 
             Balls.Add(new Ball(
-                radius,
-                Height - radius,
-                new ForceVector(xVel, 0),
+                new ForceVector(xVel, yVel),
                 radius: radius,
                 color: "#FF0000"
             //color: DrawingUtils.GenerateRandomColor().ToString()

@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Models.Extensions;
+using System.Diagnostics;
 
 namespace Infrastructure.Models.Physics
 {
@@ -10,13 +11,21 @@ namespace Infrastructure.Models.Physics
         public double Radius { get; private set; }
         public string Color { get; private set; }
 
-        public Ball(double x, double y, ForceVector force, double radius, string color)
+        public bool IsRolling {  get; private set; }
+
+        public Stopwatch BounceStopwatch { get; private set; }
+
+        public Ball(ForceVector force, double radius, string color)
         {
             Radius = radius;
-            X = Radius;
-            Y = Radius;
+            X = Radius + 50;
+            Y = Radius + 50;
             Force = force;
             Color = color;
+
+            IsRolling = false;
+            BounceStopwatch = new Stopwatch();
+            BounceStopwatch.Start();
         }
 
         public void Move60Fps(double width, double height)
@@ -26,16 +35,18 @@ namespace Infrastructure.Models.Physics
             X += Force.X * BallMovementConstants.TimeStep;
             Y += Force.Y * BallMovementConstants.TimeStep;
 
-            if (X < 0.0 + Radius || X > width - Radius)
+            if (X <= 0.0 || X >= width)
             {
                 Force.X = -Force.X;
                 X = Math.Max(0.0, Math.Min(X, width));
             }
-            if (Y < 0.0 + Radius || Y > height - Radius*1.1)
+            if (Y <= 0.0 || Y >= height)
             {
                 Force.Y = -Force.Y;
                 Y = Math.Max(0.0, Math.Min(Y, height));
             }
+
+            if (!IsRolling && Force.Y > -Radius/2 && Force.Y < Radius/2 && Y >= height) IsRolling = true;
         }
     }
 }
