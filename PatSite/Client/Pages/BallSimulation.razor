@@ -7,15 +7,36 @@
 @using Infrastructure.Models.Physics;
 @using System.Drawing;
 @using PatSite.Server.Models;
+@using Infrastructure.Constants;
 
-<LayoutView>
-    <EditForm Model="@Model">
-        Time Step: <InputNumber DisplayName="Time Step" @bind-Value=Model!.TimeStep />
-        Min Speed: <InputNumber DisplayName="Minimum Speed" @bind-Value=Model!.MinimumSpeed />
-        Max Speed: <InputNumber DisplayName="Maximum Speed" @bind-Value=Model!.MaximumSpeed />
-    </EditForm>
+<div>
+    <label>Time Step</label>
+    <input class="mx-3" type="range" min="0.1" max="5" step="0.01" @bind=PhysicalConstants.TimeStep @bind:event="oninput" />
+    <span class="ms-4">@PhysicalConstants.TimeStep</span>
+</div>
+
+<div>
+    <label>Min Speed</label>
+    <input class="mx-3" type="range" min="1" max="50" step="1" @bind=PhysicalConstants.MinimumSpeed @bind:event="oninput" />
+    <span class="ms-4">@PhysicalConstants.MinimumSpeed</span>
+</div>
+
+<div>
+    <label>Max Speed</label>
+    <input class="mx-3" type="range" min="5" max="100" step="1" @bind=PhysicalConstants.MaximumSpeed @bind:event="oninput" />
+    <span class="ms-4">@PhysicalConstants.MaximumSpeed</span>
+</div>
+
+<div>
+    <label>Wall Elasticity</label>
+    <input class="mx-3" type="range" min="0" max="1" step="0.01" @bind=PhysicalConstants.WallElasticity @bind:event="oninput" />
+    <span class="ms-4">@PhysicalConstants.WallElasticity</span>
+</div>
+
+<div>
     <button @onclick="ClearBalls">Clear Rolling Balls</button>
-</LayoutView>
+    <button @onclick="BallField.AddRandmBall">Add Random Ball</button>
+</div>
 
 <CanvasHelper @ref="CanvasHelper"
               CanvasResized="CanvasResized"
@@ -58,9 +79,8 @@
 
         foreach (Ball ball in BallField.Balls)
         {
-            ball.Move60Fps(BallField.Width, BallField.Height);
+            ball.Move(BallField.Width, BallField.Height);
         }
-
 
         await UpdateBackground();
 
@@ -90,9 +110,9 @@
     {
         await this.canvasContext.BeginBatchAsync();
 
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, -BallField.Width, 15);
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, 15, -BallField.Height);
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, 15, 15);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, -BallField.Width, BallConstants.MaxRadius);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, BallConstants.MaxRadius, -BallField.Height);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, BallConstants.MaxRadius, BallConstants.MaxRadius);
 
         await this.canvasContext.EndBatchAsync();
     }
@@ -128,7 +148,6 @@
     // Handle mouse down events
     void MouseDown(CanvasMouseArgs args)
     {
-        BallField.AddRandmBall();
     }
 
     // Handle mouse up events
@@ -143,8 +162,5 @@
 
     }
 
-    private async Task ClearBalls()
-    {
-        BallField.Balls.RemoveAll(b => b.IsRolling);
-    }
+    private async Task ClearBalls() => BallField.Balls.RemoveAll(b => b.IsRolling);
 }
