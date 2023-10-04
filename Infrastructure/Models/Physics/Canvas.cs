@@ -1,6 +1,4 @@
 ﻿using Infrastructure.Constants;
-using Infrastructure.Utils;
-using System;
 
 namespace Infrastructure.Models.Physics
 {

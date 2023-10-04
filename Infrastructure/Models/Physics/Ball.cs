@@ -17,8 +17,8 @@ namespace Infrastructure.Models.Physics
         public Ball(ForceVector force, double radius, string color)
         {
             Radius = radius;
-            X = Radius + 50;
-            Y = Radius + 50;
+            X = 2 * Radius;
+            Y = 2 * Radius;
             Force = force;
             Color = color;
 

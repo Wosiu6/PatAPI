@@ -75,12 +75,13 @@
 
     public async Task RenderFrame(double fps)
     {
-        FPS = fps;
 
         foreach (Ball ball in BallField.Balls)
         {
             ball.Move(BallField.Width, BallField.Height);
         }
+
+        FPS = fps;
 
         await UpdateBackground();
 
@@ -97,11 +98,9 @@
         await this.canvasContext.ClearRectAsync(0, 0, BallField.Width, BallField.Height);
         await this.canvasContext.SetFillStyleAsync("#003366");
         await this.canvasContext.FillRectAsync(0, 0, BallField.Width, BallField.Height);
-        await this.canvasContext.SetFontAsync("26px Segoe UI");
         await this.canvasContext.SetFillStyleAsync("#FFFFFF");
-        await this.canvasContext.FillTextAsync("Pat ball simulation in HTML Canvas", 10, 30);
         await this.canvasContext.SetFontAsync("16px consolas");
-        await this.canvasContext.FillTextAsync($"FPS: {FPS:0.000}", 10, 50);
+        await this.canvasContext.FillTextAsync($"FPS: {FPS:0.00}", BallField.Width - 100, 15);
 
         await this.canvasContext.EndBatchAsync();
     }
