@@ -1,5 +1,4 @@
-﻿using Infrastructure.Utils;
-using System;
+﻿using Infrastructure.Constants;
 
 namespace Infrastructure.Models.Physics
 {
@@ -25,15 +24,13 @@ namespace Infrastructure.Models.Physics
         {
             Random rand = new();
 
-            double xVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
-            //double yVel = RandomVelocity(rand, BallMovementConstants.MinimumSpeed, BallMovementConstants.MaximumSpeed);
+            double xVel = RandomVelocity(rand, PhysicalConstants.MinimumSpeed, PhysicalConstants.MaximumSpeed);
+            double yVel = RandomVelocity(rand, PhysicalConstants.MinimumSpeed, PhysicalConstants.MaximumSpeed);
 
-            long radius = rand.NextInt64(5, 15);
+            long radius = rand.NextInt64(BallConstants.MinRadius, BallConstants.MaxRadius);
 
             Balls.Add(new Ball(
-                radius,
-                Height - radius,
-                new ForceVector(xVel, 0),
+                new ForceVector(xVel, yVel),
                 radius: radius,
                 color: "#FF0000"
             //color: DrawingUtils.GenerateRandomColor().ToString()

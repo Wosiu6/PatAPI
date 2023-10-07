@@ -1,4 +1,5 @@
-﻿using Infrastructure.Models.Physics;
+﻿using Infrastructure.Constants;
+using Infrastructure.Models.Physics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,8 @@ namespace Infrastructure.Models.Extensions
     {
         public static void Add(this ForceVector originalVector, ForceVector newVector)
         {
-            originalVector.X += newVector.X * BallMovementConstants.TimeStep;
-            originalVector.Y += newVector.Y * BallMovementConstants.TimeStep;
+            originalVector.X += newVector.X * PhysicalConstants.TimeStep;
+            originalVector.Y += newVector.Y * PhysicalConstants.TimeStep;
         }
     }
 }

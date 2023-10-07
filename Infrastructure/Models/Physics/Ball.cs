@@ -1,4 +1,6 @@
-﻿using Infrastructure.Models.Extensions;
+﻿using Infrastructure.Constants;
+using Infrastructure.Models.Extensions;
+using System.Diagnostics;
 
 namespace Infrastructure.Models.Physics
 {
@@ -10,32 +12,58 @@ namespace Infrastructure.Models.Physics
         public double Radius { get; private set; }
         public string Color { get; private set; }
 
-        public Ball(double x, double y, ForceVector force, double radius, string color)
+        public bool IsRolling {  get; private set; }
+
+        public Ball(ForceVector force, double radius, string color)
         {
             Radius = radius;
-            X = Radius;
-            Y = Radius;
+            X = 2 * Radius;
+            Y = 2 * Radius;
             Force = force;
             Color = color;
+
+            IsRolling = false;
         }
 
-        public void Move60Fps(double width, double height)
+        public void Move(double width, double height)
         {
-            Force.Add(BallMovementConstants.Gravity);
+            MoveHorizontally();
 
-            X += Force.X * BallMovementConstants.TimeStep;
-            Y += Force.Y * BallMovementConstants.TimeStep;
-
-            if (X < 0.0 + Radius || X > width - Radius)
+            if (!IsRolling)
             {
-                Force.X = -Force.X;
-                X = Math.Max(0.0, Math.Min(X, width));
+                Force.Add(PhysicalConstants.Gravity);
+                MoveVertically();
             }
-            if (Y < 0.0 + Radius || Y > height - Radius*1.1)
+
+            void MoveHorizontally()
             {
-                Force.Y = -Force.Y;
-                Y = Math.Max(0.0, Math.Min(Y, height));
+                X += Force.X * PhysicalConstants.TimeStep;
+
+                if (X <= 0.0 + Radius || X >= width - Radius)
+                {
+                    Force.X = Force.X * PhysicalConstants.WallElasticity;
+                    Force.X = -Force.X;
+                    X = Math.Max(0.0, Math.Min(X, width - Radius));
+                }
+            }
+
+            void MoveVertically()
+            {
+                Y += Force.Y * PhysicalConstants.TimeStep;
+
+                if (Y <= 0.0 + Radius || Y >= height - Radius)
+                {
+                    Force.Y = Force.Y * PhysicalConstants.WallElasticity;
+                    Force.Y = -Force.Y;
+                    Y = Math.Max(0.0, Math.Min(Y, height - Radius));
+                }
             }
         }
+    }
+
+    public static class BallConstants
+    {
+        public static int MaxRadius = 15;
+        public static int MinRadius = 5;
     }
 }
