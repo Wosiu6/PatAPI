@@ -20,7 +20,6 @@
     <input class="mx-3" type="range" min="1" max="50" step="1" @bind=PhysicalConstants.MinimumSpeed @bind:event="oninput" />
     <span class="ms-4">@PhysicalConstants.MinimumSpeed</span>
 </div>
-
 <div>
     <label>Max Speed</label>
     <input class="mx-3" type="range" min="5" max="100" step="1" @bind=PhysicalConstants.MaximumSpeed @bind:event="oninput" />
@@ -34,9 +33,22 @@
 </div>
 
 <div>
-    <button @onclick="ClearBalls">Clear Rolling Balls</button>
-    <button @onclick="BallField.AddRandmBall">Add Random Ball</button>
+    <label>Air Resistance</label>
+    <input class="mx-3" type="range" min="0" max="0.1" step="0.00001" @bind=PhysicalConstants.AirResistance @bind:event="oninput" />
+    <span class="ms-4">@PhysicalConstants.AirResistance</span>
 </div>
+
+<div>
+    <label>Gravity?</label>
+    <input class="mx-3" type="range" min="0" max="100" step="1" @bind=PhysicalConstants.GravitationalStrength @bind:event="oninput" />
+    <span class="ms-4">@PhysicalConstants.GravitationalStrength</span>
+</div>
+
+<div>
+    <button @onclick="ClearBalls">Clear All Balls</button>
+    <button @onclick="AddBall">Add Random Ball</button>
+</div>
+
 
 <CanvasHelper @ref="CanvasHelper"
               CanvasResized="CanvasResized"
@@ -49,7 +61,7 @@
 
 </CanvasHelper>
 
-@code{
+@code {
     private Canvas BallField = new Canvas();
     private Canvas2DContext canvasContext;
     private BECanvasComponent CanvasReference;
@@ -58,9 +70,37 @@
     private double FPS;
     private DateTime LastRender;
 
-    public ConstantsChangeModel? Model;
+    public PhysicalConstantsModel? Model;
 
-    protected override void OnInitialized() => Model ??= new();
+    private Random random = new();
+
+    private List<int> TouchedBalls = new();
+    private List<int> Touch_x = new();
+    private List<int> Touch_y = new();
+    private List<int> Touch_x_after = new();
+    private List<int> Touch_y_after = new();
+
+    private List<double> X = new();
+    private List<double> Y = new();
+    private List<double> Velocity_x = new();
+    private List<double> Velocity_y = new();
+
+    private List<int> BallModes = new();
+
+    private double DeltaT = 0.1;
+    private double r = 39;
+
+    private double DeviceTiltX = 0;
+    private double DeviceTiltY = 0.1;
+
+    private int numberOfBalls = 10;
+
+    protected override void OnInitialized()
+    {
+        Model ??= new();
+
+        for (int i = 0; i < 10; i++) TouchedBalls.Add(-1);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -70,22 +110,230 @@
             canvasContext = await CanvasReference.CreateCanvas2DAsync();
             // Initialize the helper
             await CanvasHelper.Initialize();
+
+            for (var i = 0; i < numberOfBalls; i++)
+            {
+                X.Add(random.NextDouble() * BallField.Width);
+                Y.Add(random.NextDouble() * BallField.Width);
+                Velocity_x.Add(-10 + 10 * random.NextDouble());
+                Velocity_y.Add(-10 + 10 * random.NextDouble());
+                BallModes.Add(0);
+                Touch_x.Add(0);
+                Touch_x_after.Add(0);
+                Touch_y.Add(0);
+                Touch_y_after.Add(0);
+            }
         }
+    }
+
+    private void DoAccelerometer(Acceleration a)
+    {
+        this.DeviceTiltX = -0.1 * a.X;
+        this.DeviceTiltY = 0.1 * a.Y;
+    }
+
+    public async Task Render()
+    {
+        await UpdateBackground();
+
+        await UpdateForeground();
+
+        await ClearOutterBackground();
+    }
+
+    public async Task UpdateForeground()
+    {
+        //1
+        for (var i = 0; i < 10; i++)
+        {
+            if (TouchedBalls[i] >= 0)
+            {
+                Touch_x_after[i] = Touch_x[i];
+                Touch_y_after[i] = Touch_y[i];
+                if (BallModes[TouchedBalls[i]] != 1)
+                {
+                    Velocity_x[TouchedBalls[i]] = -0.5 * (X[TouchedBalls[i]] - Touch_x_after[i]) / this.DeltaT / 10.0;
+                    Velocity_y[TouchedBalls[i]] = -0.5 * (Y[TouchedBalls[i]] - Touch_y_after[i]) / this.DeltaT / 10.0;
+                }
+                else
+                {
+                    X[TouchedBalls[i]] = Touch_x[i];
+                    Y[TouchedBalls[i]] = Touch_y[i];
+                }
+            }
+        }
+
+        //2
+        for (int t = 0; t < PhysicalConstants.TimeStep; t++)
+        {
+            for (int i = 0; i < numberOfBalls; i++)
+            {
+                if (BallModes[i] != 1)
+                {
+                    X[i] += Velocity_x[i] * DeltaT;
+                    Y[i] += Velocity_y[i] * DeltaT;
+                }
+                else
+                {
+                    Velocity_x[i] = 0;
+                    Velocity_y[i] = 0;
+                }
+
+                double deltaX, deltaY;
+
+                if (BallModes[i] == 3 && i != 0)
+                {
+                    deltaX = X[i] - X[i - 1];
+                    deltaY = Y[i] - Y[i - 1];
+                    Velocity_x[i] -= 0.3 / r * (deltaX - 2 * r * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+                    Velocity_y[i] -= 0.3 / r * (deltaY - 2 * r * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+                }
+                if (BallModes[i] != 1 && i != numberOfBalls - 1 && BallModes[i + 1] == 3)
+                {
+                    deltaX = X[i] - X[i + 1];
+                    deltaY = Y[i] - Y[i + 1];
+                    Velocity_x[i] -= 0.3 / r * (deltaX - 2 * r * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+                    Velocity_y[i] -= 0.3 / r * (deltaY - 2 * r * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+                }
+
+                Velocity_x[i] -= Velocity_x[i] * PhysicalConstants.AirResistance;
+                Velocity_y[i] -= Velocity_y[i] * PhysicalConstants.AirResistance;
+
+                if (X[i] > BallField.Width)
+                {
+                    Velocity_x[i] = -Velocity_x[i] * PhysicalConstants.WallElasticity;
+                    X[i] = BallField.Width;
+                }
+                else if (X[i] < r * 2)
+                {
+                    Velocity_x[i] = -Velocity_x[i] * PhysicalConstants.WallElasticity;
+                    X[i] = r * 2;
+                }
+                if (Y[i] > BallField.Height)
+                {
+                    Velocity_y[i] = -Velocity_y[i] * PhysicalConstants.WallElasticity;
+                    Y[i] = BallField.Height;
+                }
+                else if (Y[i] < r * 2)
+                {
+                    Velocity_y[i] = -Velocity_y[i] * PhysicalConstants.WallElasticity;
+                    Y[i] = r * 2;
+                }
+            }
+            await CheckDistance();
+        }
+
+        //3
+        for (var i = 0; i < numberOfBalls; i++)
+        {
+            if (BallModes[i] != 1)
+            {
+                Velocity_x[i] += DeviceTiltX * PhysicalConstants.GravitationalStrength;
+                Velocity_y[i] += DeviceTiltY * PhysicalConstants.GravitationalStrength;
+            }
+            switch (BallModes[i])
+            {
+                case 0:
+                    await DrawBall(X[i], Y[i]);
+                    break;
+                case 1:
+                    await DrawBall(X[i], Y[i]);
+                    break;
+                case 2:
+                    await DrawBall(X[i], Y[i]);
+                    //if (i != 0)
+                    //{
+                    //    ctx.strokeStyle = "black";
+                    //    this.drawLine(this.x[i - 1], this.y[i - 1], this.x[i], this.y[i]);
+                    //}
+                    break;
+                case 3:
+                    //this.drawBall(this.x[i], this.y[i]);
+                    //if (i != 0)
+                    //{
+                    //    ctx.strokeStyle = "gray";
+                    //    this.drawLine(this.x[i - 1], this.y[i - 1], this.x[i], this.y[i]);
+                    //}
+                    break;
+            }
+        }
+    }
+
+    private async Task CheckDistance()
+    {
+        for (var i = 0; i < numberOfBalls - 1; i++)
+        {
+            for (var j = i + 1; j < numberOfBalls; j++)
+            {
+                if ((Math.Sqrt((X[i] - X[j]) * (X[i] - X[j]) + (Y[i] - Y[j]) * (Y[i] - Y[j])) < r * 2 || (BallModes[j] == 2 && j == i + 1)))
+                    await CalculateVelocity(i, j);
+            }
+        }
+    }
+
+    private async Task CalculateVelocity(int i, int j)
+    {
+        var dx = X[i] - X[j];
+        var dy = Y[i] - Y[j];
+        var dr = dx * dx + dy * dy;
+
+        double V1x, V1y, V2x, V2y;
+
+        if (dr != 0)
+        {
+            V1x = ((Velocity_x[j] * dx + Velocity_y[j] * dy) * dx + (Velocity_x[i] * dy - Velocity_y[i] * dx) * dy) / dr;
+            V1y = ((Velocity_x[j] * dx + Velocity_y[j] * dy) * dy - (Velocity_x[i] * dy - Velocity_y[i] * dx) * dx) / dr;
+            V2x = ((Velocity_x[i] * dx + Velocity_y[i] * dy) * dx + (Velocity_x[j] * dy - Velocity_y[j] * dx) * dy) / dr;
+            V2y = ((Velocity_x[i] * dx + Velocity_y[i] * dy) * dy - (Velocity_x[j] * dy - Velocity_y[j] * dx) * dx) / dr;
+
+            Velocity_x[i] = V1x;
+            Velocity_y[i] = V1y;
+            Velocity_x[j] = V2x;
+            Velocity_y[j] = V2y;
+
+            var sqrtDr = Math.Sqrt(dr);
+
+            if (BallModes[i] != 1)
+            {
+                X[i] += (2 * r - sqrtDr) * (dx / sqrtDr) * 0.5;
+                X[i] += (2 * r - sqrtDr) * (dy / sqrtDr) * 0.5;
+            }
+            if (BallModes[j] != 1)
+            {
+                X[j] -= (2 * r - sqrtDr) * (dx / sqrtDr) * 0.5;
+                Y[j] -= (2 * r - sqrtDr) * (dy / sqrtDr) * 0.5;
+            }
+        }
+    }
+
+    private async Task DrawBall(double x, double y)
+    {
+        await this.canvasContext.BeginBatchAsync();
+
+        await this.canvasContext.SetStrokeStyleAsync("#FF0000");
+        await this.canvasContext.BeginPathAsync();
+        await this.canvasContext.ArcAsync(x - r, y - r, r, 0, 2 * Math.PI);
+        await this.canvasContext.SetFillStyleAsync("#FF0100");
+        await this.canvasContext.FillAsync();
+        await this.canvasContext.StrokeAsync();
+
+        await this.canvasContext.EndBatchAsync();
     }
 
     public async Task RenderFrame(double fps)
     {
-
-        foreach (Ball ball in BallField.Balls)
-        {
-            ball.Move(BallField.Width, BallField.Height);
-        }
-
         FPS = fps;
 
         await UpdateBackground();
 
-        await UpdateBalls();
+        try
+        {
+            await UpdateForeground();
+        }
+        catch (Exception e)
+        {
+
+        }
 
         await ClearOutterBackground();
 
@@ -109,9 +357,9 @@
     {
         await this.canvasContext.BeginBatchAsync();
 
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, -BallField.Width, BallConstants.MaxRadius);
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, BallConstants.MaxRadius, -BallField.Height);
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, BallConstants.MaxRadius, BallConstants.MaxRadius);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, -BallField.Width, r);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, r, -BallField.Height);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, r, r);
 
         await this.canvasContext.EndBatchAsync();
     }
@@ -161,5 +409,32 @@
 
     }
 
-    private async Task ClearBalls() => BallField.Balls.RemoveAll(b => b.IsRolling);
+    private async Task ClearBalls()
+    {
+        X.Clear();
+        Y.Clear();
+        Velocity_x.Clear();
+        BallModes.Clear();
+        Touch_x.Clear();
+        Touch_x_after.Clear();
+        Touch_y.Clear();
+        Touch_y_after.Clear();
+
+        numberOfBalls = 0;
+    }
+
+    private async Task AddBall()
+    {
+        X.Add(random.NextDouble() * BallField.Width);
+        Y.Add(random.NextDouble() * BallField.Height);
+        Velocity_x.Add(-5 + 10 * random.NextDouble());
+        Velocity_y.Add(-5 + 10 * random.NextDouble());
+        BallModes.Add(0);
+        Touch_x.Add(0);
+        Touch_x_after.Add(0);
+        Touch_y.Add(0);
+        Touch_y_after.Add(0);
+
+        numberOfBalls++;
+    }
 }

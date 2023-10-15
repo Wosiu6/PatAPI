@@ -12,7 +12,7 @@ namespace Infrastructure.Models.Physics
         public double Radius { get; private set; }
         public string Color { get; private set; }
 
-        public bool IsRolling {  get; private set; }
+        public bool IsRolling { get; private set; }
 
         public Ball(ForceVector force, double radius, string color)
         {
