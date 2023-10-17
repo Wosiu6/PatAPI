@@ -2,13 +2,13 @@
 
 namespace Infrastructure.Models.Physics
 {
-    public class Canvas
+    public class Ballfield
     {
         public readonly List<Ball> Balls = new();
         public double Width { get; private set; }
         public double Height { get; private set; }
 
-        public Canvas()
+        public Ballfield()
         {
         }
 
@@ -27,8 +27,8 @@ namespace Infrastructure.Models.Physics
             double xVel = RandomVelocity(rand, PhysicalConstants.MinimumSpeed, PhysicalConstants.MaximumSpeed);
             double yVel = RandomVelocity(rand, PhysicalConstants.MinimumSpeed, PhysicalConstants.MaximumSpeed);
 
-            //long radius = rand.NextInt64(BallConstants.MinRadius, BallConstants.MaxRadius);
-            long radius = 30; // Can't account for various radiuses for now due to a need of much more complex calculations
+            long radius = rand.NextInt64(BallConstants.MinRadius, BallConstants.MaxRadius);
+            //long radius = 30; // Can't account for various radiuses for now due to a need of much more complex calculations
 
             Balls.Add(new Ball(
                 new Velocity(xVel, yVel),

@@ -15,7 +15,6 @@ namespace Infrastructure.Models.Physics
 
         public bool IsRolling { get; private set; }
 
-        public Ball() { }
         public Ball(Velocity velocity, double x, double y, double radius, string color, int mode = 0)
         {
             Radius = radius;
