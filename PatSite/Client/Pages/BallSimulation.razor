@@ -11,7 +11,7 @@
 
 <div>
     <label>Time Step</label>
-    <input class="mx-3" type="range" min="0.1" max="5" step="0.01" @bind=PhysicalConstants.TimeStep @bind:event="oninput" />
+    <input class="mx-3" type="range" min="0.1" max="10" step="0.1" @bind=PhysicalConstants.TimeStep @bind:event="oninput" />
     <span class="ms-4">@PhysicalConstants.TimeStep</span>
 </div>
 
@@ -34,7 +34,7 @@
 
 <div>
     <label>Air Resistance</label>
-    <input class="mx-3" type="range" min="0" max="0.1" step="0.00001" @bind=PhysicalConstants.AirResistance @bind:event="oninput" />
+    <input class="mx-3" type="range" min="0" max="0.0001" step="0.0000001" @bind=PhysicalConstants.AirResistance @bind:event="oninput" />
     <span class="ms-4">@PhysicalConstants.AirResistance</span>
 </div>
 
@@ -80,15 +80,7 @@
     private List<int> Touch_x_after = new();
     private List<int> Touch_y_after = new();
 
-    private List<double> X = new();
-    private List<double> Y = new();
-    private List<double> Velocity_x = new();
-    private List<double> Velocity_y = new();
-
-    private List<int> BallModes = new();
-
     private double DeltaT = 0.1;
-    private double r = 39;
 
     private double DeviceTiltX = 0;
     private double DeviceTiltY = 0.1;
@@ -113,11 +105,8 @@
 
             for (var i = 0; i < numberOfBalls; i++)
             {
-                X.Add(random.NextDouble() * BallField.Width);
-                Y.Add(random.NextDouble() * BallField.Width);
-                Velocity_x.Add(-10 + 10 * random.NextDouble());
-                Velocity_y.Add(-10 + 10 * random.NextDouble());
-                BallModes.Add(0);
+                BallField.AddRandmBall();
+
                 Touch_x.Add(0);
                 Touch_x_after.Add(0);
                 Touch_y.Add(0);
@@ -143,104 +132,114 @@
 
     public async Task UpdateForeground()
     {
-        //1
+        // Physics for touched balls
         for (var i = 0; i < 10; i++)
         {
             if (TouchedBalls[i] >= 0)
             {
                 Touch_x_after[i] = Touch_x[i];
                 Touch_y_after[i] = Touch_y[i];
-                if (BallModes[TouchedBalls[i]] != 1)
+                if (BallField.Balls[i].Mode != 1)
                 {
-                    Velocity_x[TouchedBalls[i]] = -0.5 * (X[TouchedBalls[i]] - Touch_x_after[i]) / this.DeltaT / 10.0;
-                    Velocity_y[TouchedBalls[i]] = -0.5 * (Y[TouchedBalls[i]] - Touch_y_after[i]) / this.DeltaT / 10.0;
+                    BallField.Balls[i].Velocity.X = -0.5 * (BallField.Balls[i].X - Touch_x_after[i]) / this.DeltaT / 10.0;
+                    BallField.Balls[i].Velocity.Y = -0.5 * (BallField.Balls[i].Y - Touch_y_after[i]) / this.DeltaT / 10.0;
                 }
                 else
                 {
-                    X[TouchedBalls[i]] = Touch_x[i];
-                    Y[TouchedBalls[i]] = Touch_y[i];
+                    BallField.Balls[i].X = Touch_x[i];
+                    BallField.Balls[i].Y = Touch_y[i];
                 }
             }
         }
 
-        //2
+        // Main physics
         for (int t = 0; t < PhysicalConstants.TimeStep; t++)
         {
             for (int i = 0; i < numberOfBalls; i++)
             {
-                if (BallModes[i] != 1)
+                Ball currentBall = BallField.Balls[i];
+
+                Ball previousBall = new Ball();
+                Ball nextBall = new Ball();
+
+                if (BallField.Balls.Count > 1 && i > 0) previousBall = BallField.Balls[i - 1];
+                if (BallField.Balls.Count > 1 && i < BallField.Balls.Count - 1) nextBall = BallField.Balls[i + 1];
+
+                if (currentBall.Mode != 1)
                 {
-                    X[i] += Velocity_x[i] * DeltaT;
-                    Y[i] += Velocity_y[i] * DeltaT;
+                    currentBall.X += currentBall.Velocity.X * DeltaT;
+                    currentBall.Y += currentBall.Velocity.Y * DeltaT;
                 }
                 else
                 {
-                    Velocity_x[i] = 0;
-                    Velocity_y[i] = 0;
+                    currentBall.Velocity.X = 0;
+                    currentBall.Velocity.Y = 0;
                 }
 
                 double deltaX, deltaY;
 
-                if (BallModes[i] == 3 && i != 0)
+                if (currentBall.Mode == 3 && i != 0)
                 {
-                    deltaX = X[i] - X[i - 1];
-                    deltaY = Y[i] - Y[i - 1];
-                    Velocity_x[i] -= 0.3 / r * (deltaX - 2 * r * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
-                    Velocity_y[i] -= 0.3 / r * (deltaY - 2 * r * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+                    deltaX = currentBall.X - previousBall.X;
+                    deltaY = currentBall.Y - previousBall.Y;
+                    currentBall.Velocity.X -= 0.3 / currentBall.Radius * (deltaX - 2 * currentBall.Radius * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+                    currentBall.Velocity.Y -= 0.3 / currentBall.Radius * (deltaY - 2 * currentBall.Radius * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
                 }
-                if (BallModes[i] != 1 && i != numberOfBalls - 1 && BallModes[i + 1] == 3)
+                if (currentBall.Mode != 1 && i != numberOfBalls - 1 && nextBall.Mode == 3)
                 {
-                    deltaX = X[i] - X[i + 1];
-                    deltaY = Y[i] - Y[i + 1];
-                    Velocity_x[i] -= 0.3 / r * (deltaX - 2 * r * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
-                    Velocity_y[i] -= 0.3 / r * (deltaY - 2 * r * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+                    deltaX = currentBall.X - nextBall.X;
+                    deltaY = currentBall.Y - nextBall.Y;
+                    currentBall.Velocity.X -= 0.3 / currentBall.Radius * (deltaX - 2 * currentBall.Radius * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+                    currentBall.Velocity.Y -= 0.3 / currentBall.Radius * (deltaY - 2 * currentBall.Radius * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
                 }
 
-                Velocity_x[i] -= Velocity_x[i] * PhysicalConstants.AirResistance;
-                Velocity_y[i] -= Velocity_y[i] * PhysicalConstants.AirResistance;
+                currentBall.Velocity.X -= currentBall.Velocity.X * PhysicalConstants.AirResistance;
+                currentBall.Velocity.Y -= currentBall.Velocity.Y * PhysicalConstants.AirResistance;
 
-                if (X[i] > BallField.Width)
+                if (currentBall.X > BallField.Width)
                 {
-                    Velocity_x[i] = -Velocity_x[i] * PhysicalConstants.WallElasticity;
-                    X[i] = BallField.Width;
+                    currentBall.Velocity.X = -currentBall.Velocity.X * PhysicalConstants.WallElasticity;
+                    currentBall.X = BallField.Width;
                 }
-                else if (X[i] < r * 2)
+                else if (currentBall.X < currentBall.Radius * 2)
                 {
-                    Velocity_x[i] = -Velocity_x[i] * PhysicalConstants.WallElasticity;
-                    X[i] = r * 2;
+                    currentBall.Velocity.X = -currentBall.Velocity.X * PhysicalConstants.WallElasticity;
+                    currentBall.X = currentBall.Radius * 2;
                 }
-                if (Y[i] > BallField.Height)
+                if (currentBall.Y > BallField.Height)
                 {
-                    Velocity_y[i] = -Velocity_y[i] * PhysicalConstants.WallElasticity;
-                    Y[i] = BallField.Height;
+                    currentBall.Velocity.Y = -currentBall.Velocity.Y * PhysicalConstants.WallElasticity;
+                    currentBall.Y = BallField.Height;
                 }
-                else if (Y[i] < r * 2)
+                else if (currentBall.Y < currentBall.Radius * 2)
                 {
-                    Velocity_y[i] = -Velocity_y[i] * PhysicalConstants.WallElasticity;
-                    Y[i] = r * 2;
+                    currentBall.Velocity.Y = -currentBall.Velocity.Y * PhysicalConstants.WallElasticity;
+                    currentBall.Y = currentBall.Radius * 2;
                 }
             }
             await CheckDistance();
         }
 
-        //3
+        // Drawing + Gravity
         for (var i = 0; i < numberOfBalls; i++)
         {
-            if (BallModes[i] != 1)
+            Ball currentBall = BallField.Balls[i];
+
+            if (currentBall.Mode != 1)
             {
-                Velocity_x[i] += DeviceTiltX * PhysicalConstants.GravitationalStrength;
-                Velocity_y[i] += DeviceTiltY * PhysicalConstants.GravitationalStrength;
+                currentBall.Velocity.X += DeviceTiltX * PhysicalConstants.GravitationalStrength;
+                currentBall.Velocity.Y += DeviceTiltY * PhysicalConstants.GravitationalStrength;
             }
-            switch (BallModes[i])
+            switch (currentBall.Mode)
             {
                 case 0:
-                    await DrawBall(X[i], Y[i]);
+                    await DrawBall(currentBall);
                     break;
                 case 1:
-                    await DrawBall(X[i], Y[i]);
+                    await DrawBall(currentBall);
                     break;
                 case 2:
-                    await DrawBall(X[i], Y[i]);
+                    await DrawBall(currentBall);
                     //if (i != 0)
                     //{
                     //    ctx.strokeStyle = "black";
@@ -265,55 +264,60 @@
         {
             for (var j = i + 1; j < numberOfBalls; j++)
             {
-                if ((Math.Sqrt((X[i] - X[j]) * (X[i] - X[j]) + (Y[i] - Y[j]) * (Y[i] - Y[j])) < r * 2 || (BallModes[j] == 2 && j == i + 1)))
-                    await CalculateVelocity(i, j);
+                Ball currentTopBall = BallField.Balls[i];
+                Ball currentBottomBall = BallField.Balls[j];
+
+                if ((Math.Sqrt((currentTopBall.X - currentBottomBall.X) * (currentTopBall.X - currentBottomBall.X) + (currentTopBall.Y - currentBottomBall.Y) * (currentTopBall.Y - currentBottomBall.Y)) < (currentTopBall.Radius + currentBottomBall.Radius) || (currentBottomBall.Mode == 2 && j == i + 1)))
+                {
+                    await CalculateVelocity(currentTopBall, currentBottomBall);
+                }
             }
         }
     }
 
-    private async Task CalculateVelocity(int i, int j)
+    private async Task CalculateVelocity(Ball currentTopBall, Ball currentBottomBall)
     {
-        var dx = X[i] - X[j];
-        var dy = Y[i] - Y[j];
-        var dr = dx * dx + dy * dy;
+        var deltaX = currentTopBall.X - currentBottomBall.X;
+        var deltaY = currentTopBall.Y - currentBottomBall.Y;
+        var deltaR = deltaX * deltaX + deltaY * deltaY;
 
         double V1x, V1y, V2x, V2y;
 
-        if (dr != 0)
+        if (deltaR != 0)
         {
-            V1x = ((Velocity_x[j] * dx + Velocity_y[j] * dy) * dx + (Velocity_x[i] * dy - Velocity_y[i] * dx) * dy) / dr;
-            V1y = ((Velocity_x[j] * dx + Velocity_y[j] * dy) * dy - (Velocity_x[i] * dy - Velocity_y[i] * dx) * dx) / dr;
-            V2x = ((Velocity_x[i] * dx + Velocity_y[i] * dy) * dx + (Velocity_x[j] * dy - Velocity_y[j] * dx) * dy) / dr;
-            V2y = ((Velocity_x[i] * dx + Velocity_y[i] * dy) * dy - (Velocity_x[j] * dy - Velocity_y[j] * dx) * dx) / dr;
+            V1x = ((currentBottomBall.Velocity.X * deltaX + currentBottomBall.Velocity.Y * deltaY) * deltaX + (currentTopBall.Velocity.X * deltaY - currentTopBall.Velocity.Y * deltaX) * deltaY) / deltaR;
+            V1y = ((currentBottomBall.Velocity.X * deltaX + currentBottomBall.Velocity.Y * deltaY) * deltaY - (currentTopBall.Velocity.X * deltaY - currentTopBall.Velocity.Y * deltaX) * deltaX) / deltaR;
+            V2x = ((currentTopBall.Velocity.X * deltaX + currentTopBall.Velocity.Y * deltaY) * deltaX + (currentBottomBall.Velocity.X * deltaY - currentBottomBall.Velocity.Y * deltaX) * deltaY) / deltaR;
+            V2y = ((currentTopBall.Velocity.X * deltaX + currentTopBall.Velocity.Y * deltaY) * deltaY - (currentBottomBall.Velocity.X * deltaY - currentBottomBall.Velocity.Y * deltaX) * deltaX) / deltaR;
 
-            Velocity_x[i] = V1x;
-            Velocity_y[i] = V1y;
-            Velocity_x[j] = V2x;
-            Velocity_y[j] = V2y;
+            currentTopBall.Velocity.X = V1x;
+            currentTopBall.Velocity.Y = V1y;
+            currentBottomBall.Velocity.X = V2x;
+            currentBottomBall.Velocity.Y = V2y;
 
-            var sqrtDr = Math.Sqrt(dr);
+            var sqrtDr = Math.Sqrt(deltaR);
 
-            if (BallModes[i] != 1)
+            if (currentTopBall.Mode != 1)
             {
-                X[i] += (2 * r - sqrtDr) * (dx / sqrtDr) * 0.5;
-                X[i] += (2 * r - sqrtDr) * (dy / sqrtDr) * 0.5;
+                currentTopBall.X += (2 * currentTopBall.Radius - sqrtDr) * (deltaX / sqrtDr) * 0.5;
+                currentTopBall.Y += (2 * currentTopBall.Radius - sqrtDr) * (deltaY / sqrtDr) * 0.5;
             }
-            if (BallModes[j] != 1)
+            if (currentBottomBall.Mode != 1)
             {
-                X[j] -= (2 * r - sqrtDr) * (dx / sqrtDr) * 0.5;
-                Y[j] -= (2 * r - sqrtDr) * (dy / sqrtDr) * 0.5;
+                currentBottomBall.X -= (2 * currentBottomBall.Radius - sqrtDr) * (deltaX / sqrtDr) * 0.5;
+                currentBottomBall.Y -= (2 * currentBottomBall.Radius - sqrtDr) * (deltaY / sqrtDr) * 0.5;
             }
         }
     }
 
-    private async Task DrawBall(double x, double y)
+    private async Task DrawBall(Ball ball)
     {
         await this.canvasContext.BeginBatchAsync();
 
-        await this.canvasContext.SetStrokeStyleAsync("#FF0000");
+        await this.canvasContext.SetStrokeStyleAsync(ball.Color); // contour
         await this.canvasContext.BeginPathAsync();
-        await this.canvasContext.ArcAsync(x - r, y - r, r, 0, 2 * Math.PI);
-        await this.canvasContext.SetFillStyleAsync("#FF0100");
+        await this.canvasContext.ArcAsync(ball.X - ball.Radius, ball.Y - ball.Radius, ball.Radius, 0, 2 * Math.PI);
+        await this.canvasContext.SetFillStyleAsync(ball.Color); // fill
         await this.canvasContext.FillAsync();
         await this.canvasContext.StrokeAsync();
 
@@ -357,9 +361,9 @@
     {
         await this.canvasContext.BeginBatchAsync();
 
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, -BallField.Width, r);
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, r, -BallField.Height);
-        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, r, r);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, -BallField.Width, 100);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, 100, -BallField.Height);
+        await this.canvasContext.ClearRectAsync(BallField.Width, BallField.Height, 100, 100);
 
         await this.canvasContext.EndBatchAsync();
     }
@@ -395,6 +399,7 @@
     // Handle mouse down events
     void MouseDown(CanvasMouseArgs args)
     {
+
     }
 
     // Handle mouse up events
@@ -411,10 +416,7 @@
 
     private async Task ClearBalls()
     {
-        X.Clear();
-        Y.Clear();
-        Velocity_x.Clear();
-        BallModes.Clear();
+        BallField.Balls.Clear();
         Touch_x.Clear();
         Touch_x_after.Clear();
         Touch_y.Clear();
@@ -425,11 +427,8 @@
 
     private async Task AddBall()
     {
-        X.Add(random.NextDouble() * BallField.Width);
-        Y.Add(random.NextDouble() * BallField.Height);
-        Velocity_x.Add(-5 + 10 * random.NextDouble());
-        Velocity_y.Add(-5 + 10 * random.NextDouble());
-        BallModes.Add(0);
+        BallField.AddRandmBall();
+
         Touch_x.Add(0);
         Touch_x_after.Add(0);
         Touch_y.Add(0);
