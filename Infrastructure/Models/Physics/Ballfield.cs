@@ -15,17 +15,14 @@ namespace Infrastructure.Models.Physics
         public void Resize(double width, double height) =>
             (Width, Height) = (width, height);
 
-        private double RandomVelocity(Random rand, double min, double max)
-        {
-            return rand.NextDouble() * (max - min) + min;
-        }
+        private static double GenerateRandomVelocity(Random rand, double min, double max) => rand.NextDouble() * (max - min) + min;
 
         public void AddRandmBall()
         {
             Random rand = new();
 
-            double xVel = RandomVelocity(rand, PhysicalConstants.MinimumSpeed, PhysicalConstants.MaximumSpeed);
-            double yVel = RandomVelocity(rand, PhysicalConstants.MinimumSpeed, PhysicalConstants.MaximumSpeed);
+            double xVel = GenerateRandomVelocity(rand, PhysicalConstants.MinimumSpeed, PhysicalConstants.MaximumSpeed);
+            double yVel = GenerateRandomVelocity(rand, PhysicalConstants.MinimumSpeed, PhysicalConstants.MaximumSpeed);
 
             long radius = rand.NextInt64(BallConstants.MinRadius, BallConstants.MaxRadius);
             //long radius = 30; // Can't account for various radiuses for now due to a need of much more complex calculations

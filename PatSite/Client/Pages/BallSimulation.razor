@@ -118,7 +118,6 @@
         }
     }
 
-
     public void UpdateForeground()
     {
         // Physics for touched balls
@@ -246,7 +245,6 @@
         }
     }
 
-
     private void DoAccelerometer(Acceleration a)
     {
         this._deviceTiltX = -0.1 * a.X;
@@ -261,6 +259,12 @@
         await this._canvasContext.BeginPathAsync();
         await this._canvasContext.ArcAsync(ball.X, ball.Y, ball.Radius, 0, 2 * Math.PI);
         await this._canvasContext.SetFillStyleAsync(ball.Color); // fill
+        await this._canvasContext.FillAsync();
+
+        await this._canvasContext.SetStrokeStyleAsync("#FFFFFF"); // contour
+        await this._canvasContext.BeginPathAsync();
+        await this._canvasContext.ArcAsync(ball.X, ball.Y, 1, 0, 2 * Math.PI);
+        await this._canvasContext.SetFillStyleAsync("#FFFFFF"); // fill
         await this._canvasContext.FillAsync();
 
         await this._canvasContext.StrokeAsync();
