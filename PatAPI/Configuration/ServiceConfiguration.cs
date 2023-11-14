@@ -3,14 +3,16 @@ using Microsoft.OpenApi.Models;
 using PatAPI.Handlers;
 using PatAPI.Services;
 
-public static class ServiceConfiguration
+namespace PatAPI.Configuration
 {
-    public static void Configure(IServiceCollection services)
+    public static class ServiceConfiguration
     {
-        ConfigureClients(services);
+        public static void Configure(IServiceCollection services)
+        {
+            ConfigureClients(services);
 
-        services.AddSingleton<IHowLongToBeatService, HowLongToBeatService>();
-        services.AddScoped<CachedHowLongToBeatHandler>();
+            services.AddSingleton<IHowLongToBeatService, HowLongToBeatService>();
+            services.AddScoped<CachedHowLongToBeatHandler>();
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(x =>
@@ -43,17 +45,18 @@ public static class ServiceConfiguration
         });
     }
 
-    private static void ConfigureClients(IServiceCollection services)
-    {
-        services.AddMemoryCache();
-
-        services.AddHttpClient(HowLongToBeatConstants.ClientName, client =>
+        private static void ConfigureClients(IServiceCollection services)
         {
-            client.BaseAddress = HowLongToBeatConstants.BaseUrl;
+            services.AddMemoryCache();
 
-            client.DefaultRequestHeaders.Add("origin", client.BaseAddress.AbsoluteUri);
-            client.DefaultRequestHeaders.Add("referer", client.BaseAddress.AbsoluteUri);
-            client.DefaultRequestHeaders.Add("user-agent", HowLongToBeatConstants.UserAgent);
-        }).AddHttpMessageHandler<CachedHowLongToBeatHandler>();
+            services.AddHttpClient(HowLongToBeatConstants.ClientName, client =>
+            {
+                client.BaseAddress = HowLongToBeatConstants.BaseUrl;
+
+                client.DefaultRequestHeaders.Add("origin", client.BaseAddress.AbsoluteUri);
+                client.DefaultRequestHeaders.Add("referer", client.BaseAddress.AbsoluteUri);
+                client.DefaultRequestHeaders.Add("user-agent", HowLongToBeatConstants.UserAgent);
+            }).AddHttpMessageHandler<CachedHowLongToBeatHandler>();
+        }
     }
 }
