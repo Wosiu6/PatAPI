@@ -1,12 +1,7 @@
 ﻿using Infrastructure.Constants;
-using Infrastructure.Models.Physics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Infrastructure.Physics;
 
-namespace Infrastructure.Models.Extensions
+namespace Infrastructure.Extensions
 {
     public static class ForceVectorExtensions
     {

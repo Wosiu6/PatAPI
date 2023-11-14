@@ -72,7 +72,7 @@ namespace PatAPI.Clients
                 }
             }
 
-            throw new InvalidOperationException("Build ID not found in the response.");
+            throw new ("Build ID not found in the response.");
         }
     }
 }

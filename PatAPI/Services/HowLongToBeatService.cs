@@ -1,4 +1,4 @@
-﻿using Infrastructure.Models.Exceptions;
+﻿using Infrastructure.Exceptions;
 using Infrastructure.Models.HLTB;
 using Infrastructure.Models.HLTB._next;
 using Microsoft.Extensions.Caching.Memory;

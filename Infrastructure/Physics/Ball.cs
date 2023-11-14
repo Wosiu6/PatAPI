@@ -1,8 +1,4 @@
-﻿using Infrastructure.Constants;
-using Infrastructure.Models.Extensions;
-using System.Diagnostics;
-
-namespace Infrastructure.Models.Physics
+﻿namespace Infrastructure.Physics
 {
     public class Ball
     {
@@ -24,7 +20,7 @@ namespace Infrastructure.Models.Physics
             Y = y;
             Velocity = velocity;
             Color = color;
-            Mode = 0;
+            Mode = mode;
             IsRolling = false;
         }
 

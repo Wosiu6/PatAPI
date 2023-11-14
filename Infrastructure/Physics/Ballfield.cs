@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Constants;
 
-namespace Infrastructure.Models.Physics
+namespace Infrastructure.Physics
 {
     public class Ballfield
     {

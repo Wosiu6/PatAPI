@@ -1,4 +1,4 @@
-﻿using Infrastructure.Models.Physics;
+﻿using Infrastructure.Physics;
 
 namespace Infrastructure.Constants
 {

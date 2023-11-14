@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Infrastructure.Models.Exceptions
+namespace Infrastructure.Exceptions
 {
     [Serializable]
     public class GenericException : Exception
