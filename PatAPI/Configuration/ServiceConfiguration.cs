@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Constants;
+using Microsoft.OpenApi.Models;
 using PatAPI.Handlers;
 using PatAPI.Services;
 
@@ -13,9 +14,36 @@ namespace PatAPI.Configuration
             services.AddSingleton<IHowLongToBeatService, HowLongToBeatService>();
             services.AddScoped<CachedHowLongToBeatHandler>();
 
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
-        }
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(x =>
+        {
+            x.AddSecurityDefinition("SteamApiKey", new OpenApiSecurityScheme
+            {
+                Description = "The Steam API Key to access the API",
+                Type = SecuritySchemeType.ApiKey,
+                Name = "x-api-key",
+                In = ParameterLocation.Header,
+                Scheme = "ApiKeyScheme"
+            });
+
+            OpenApiSecurityScheme scheme = new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "SteamApiKey"
+                },
+                In = ParameterLocation.Header,
+            };
+
+            OpenApiSecurityRequirement securityRequirement = new OpenApiSecurityRequirement
+            {
+                {scheme, new List<string>() }
+            };
+
+            x.AddSecurityRequirement(securityRequirement);
+        });
+    }
 
         private static void ConfigureClients(IServiceCollection services)
         {
