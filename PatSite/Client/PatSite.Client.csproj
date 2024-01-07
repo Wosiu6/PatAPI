@@ -1,30 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+		<BlazorCacheBootResources>false</BlazorCacheBootResources>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="wwwroot\assets\css\images\arrow.svg" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="wwwroot\assets\css\images\arrow.svg" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AvnCanvasHelper" Version="1.0.0" />
-    <PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.20" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.20" PrivateAssets="all" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AvnCanvasHelper" Version="1.0.0" />
+		<PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.20" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.20" PrivateAssets="all" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\Shared\PatSite.Shared.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
+		<ProjectReference Include="..\Shared\PatSite.Shared.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
-  </ItemGroup>
+	<ItemGroup>
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
 
 </Project>
