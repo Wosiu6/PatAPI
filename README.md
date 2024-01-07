@@ -1,4 +1,4 @@
-# PatAPI
+# PatSite
  Hobby project to learn more about .NET APIs and Blazor
 
 ## Current Functionality
