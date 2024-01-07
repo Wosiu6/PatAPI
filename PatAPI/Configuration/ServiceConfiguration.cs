@@ -2,6 +2,7 @@
 using Microsoft.OpenApi.Models;
 using PatAPI.Handlers;
 using PatAPI.Services;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace PatAPI.Configuration
 {
@@ -14,14 +15,36 @@ namespace PatAPI.Configuration
             services.AddSingleton<IHowLongToBeatService, HowLongToBeatService>();
             services.AddScoped<CachedHowLongToBeatHandler>();
 
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(x =>
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(sgo =>
+            {
+                ConfigureSteamApiKey(sgo);                                      /* Steam web API key auth documentation - https://partner.steamgames.com/doc/webapi_overview/auth */
+                ConfigureFacebookAccessToken(sgo);     
+                /* Facebook Access Token doc - https://developers.facebook.com/docs/messenger-platform/reference/send-api/#send-api-reference */
+            });
+        }
+
+        private static void ConfigureClients(IServiceCollection services)
         {
-            x.AddSecurityDefinition("SteamApiKey", new OpenApiSecurityScheme
+            services.AddMemoryCache();
+
+            services.AddHttpClient(HowLongToBeatConstants.ClientName, client =>
+            {
+                client.BaseAddress = HowLongToBeatConstants.BaseUrl;
+
+                client.DefaultRequestHeaders.Add("origin", client.BaseAddress.AbsoluteUri);
+                client.DefaultRequestHeaders.Add("referer", client.BaseAddress.AbsoluteUri);
+                client.DefaultRequestHeaders.Add("user-agent", HowLongToBeatConstants.UserAgent);
+            }).AddHttpMessageHandler<CachedHowLongToBeatHandler>();
+        }
+
+        private static void ConfigureSteamApiKey(SwaggerGenOptions sgo)
+        {
+            sgo.AddSecurityDefinition("SteamApiKey", new OpenApiSecurityScheme
             {
                 Description = "The Steam API Key to access the API",
                 Type = SecuritySchemeType.ApiKey,
-                Name = "x-api-key",
+                Name = "x-webapi-key",
                 In = ParameterLocation.Header,
                 Scheme = "ApiKeyScheme"
             });
@@ -37,26 +60,40 @@ namespace PatAPI.Configuration
             };
 
             OpenApiSecurityRequirement securityRequirement = new OpenApiSecurityRequirement
+                {
+                    {scheme, new List<string>() }
+                };
+
+            sgo.AddSecurityRequirement(securityRequirement);
+        }
+
+        private static void ConfigureFacebookAccessToken(SwaggerGenOptions sgo)
+        {
+            sgo.AddSecurityDefinition("FacebookPageAccessToken", new OpenApiSecurityScheme
             {
-                {scheme, new List<string>() }
+                Description = "The Facebook Page Access Token",
+                Type = SecuritySchemeType.OAuth2,
+                Name = "access_token",
+                In = ParameterLocation.Query,
+                Scheme = "FacebookAccessToken"
+            });
+
+            OpenApiSecurityScheme scheme = new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "FacebookAccessToken"
+                },
+                In = ParameterLocation.Query,
             };
 
-            x.AddSecurityRequirement(securityRequirement);
-        });
-    }
+            OpenApiSecurityRequirement securityRequirement = new OpenApiSecurityRequirement
+                {
+                    {scheme, new List<string>() }
+                };
 
-        private static void ConfigureClients(IServiceCollection services)
-        {
-            services.AddMemoryCache();
-
-            services.AddHttpClient(HowLongToBeatConstants.ClientName, client =>
-            {
-                client.BaseAddress = HowLongToBeatConstants.BaseUrl;
-
-                client.DefaultRequestHeaders.Add("origin", client.BaseAddress.AbsoluteUri);
-                client.DefaultRequestHeaders.Add("referer", client.BaseAddress.AbsoluteUri);
-                client.DefaultRequestHeaders.Add("user-agent", HowLongToBeatConstants.UserAgent);
-            }).AddHttpMessageHandler<CachedHowLongToBeatHandler>();
+            sgo.AddSecurityRequirement(securityRequirement);
         }
     }
 }

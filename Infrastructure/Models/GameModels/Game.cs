@@ -1,7 +1,7 @@
 ﻿
-namespace Infrastructure.Models
+namespace Infrastructure.Models.GameModels
 {
-    public class Game
+    public class Game : IGame
     {
         public int Id { get; set; }
         public string? Name { get; set; }

@@ -1,11 +1,22 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.OpenApi.Models;
+using PatSite.Server.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+});
+
 builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 builder.Services.AddRazorPages();
+
+ServiceConfiguration.Configure(builder.Services);
 
 var app = builder.Build();
 
@@ -26,8 +37,13 @@ app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
-app.UseRouting();
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("v1/swagger.json", "v1");
+});
 
+app.UseRouting();
 
 app.MapRazorPages();
 app.MapControllers();

@@ -1,40 +1,29 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">PatSite</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+﻿<!-- Nav -->
+<section id="sidebar">
+    <div class="inner">
+        <nav>
+            <ul>
+                <li>
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Home
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link" href="ballSimulation">
+                        <span class="oi oi-plus" aria-hidden="true"></span> BallSimulation
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link" href="hltbApi">
+                        <span class="oi oi-plus" aria-hidden="true"></span> HLTB Api Swagger Doc
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link" href="facebookSpam">
+                        <span class="oi oi-heart" aria-hidden="true"></span> Facebook Spam (not implemented)
+                    </NavLink>
+                </li>
+            </ul>
+        </nav>
     </div>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ballsimulation">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Ball Simulation
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
-@code
-{
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-}
+</section>

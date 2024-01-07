@@ -1,4 +1,4 @@
-﻿@page "/ballsimulation"
+﻿@page "/ballSimulation"
 
 @using AvnCanvasHelper;
 @using Blazor.Extensions
@@ -9,57 +9,65 @@
 @using PatSite.Server.Models;
 @using Infrastructure.Constants;
 
-<div>
-    <label>Time Step</label>
-    <input class="mx-3" type="range" min="0.1" max="10" step="0.1" @bind=PhysicalConstants.TimeStep @bind:event="oninput" />
-    <span class="ms-4">@PhysicalConstants.TimeStep</span>
-</div>
+<section class="wrapper style2 fullscreen">
+    <div>
+        <h1>Ball simulation in blazor canvas by Patryk Wos</h1>
+    </div>
+    <div class="canvas">
+        <CanvasHelper @ref="_canvasHelper"
+                      CanvasResized="CanvasResized"
+                      RenderFrame="RenderFrame"
+                      MouseDown="MouseDown"
+                      MouseUp="MouseUp"
+                      MouseMove="MouseMove">
 
-<div>
-    <label>Min Speed</label>
-    <input class="mx-3" type="range" min="1" max="50" step="1" @bind=PhysicalConstants.MinimumSpeed @bind:event="oninput" />
-    <span class="ms-4">@PhysicalConstants.MinimumSpeed</span>
-</div>
-<div>
-    <label>Max Speed</label>
-    <input class="mx-3" type="range" min="5" max="100" step="1" @bind=PhysicalConstants.MaximumSpeed @bind:event="oninput" />
-    <span class="ms-4">@PhysicalConstants.MaximumSpeed</span>
-</div>
+            <BECanvas @ref="_canvasReference"></BECanvas>
 
-<div>
-    <label>Wall Elasticity</label>
-    <input class="mx-3" type="range" min="0" max="1" step="0.01" @bind=PhysicalConstants.WallElasticity @bind:event="oninput" />
-    <span class="ms-4">@PhysicalConstants.WallElasticity</span>
-</div>
+        </CanvasHelper>
+    </div>
+    <div class="wrapper style1 bottom">
+        <div class="sliders">
+            <div>
+                <label>Time Step</label>
+                <input class="mx-3" type="range" min="0.1" max="10" step="0.1" @bind=PhysicalConstants.TimeStep @bind:event="oninput" />
+                <span class="ms-4">@PhysicalConstants.TimeStep</span>
+            </div>
 
-<div>
-    <label>Air Resistance</label>
-    <input class="mx-3" type="range" min="0" max="0.0001" step="0.0000001" @bind=PhysicalConstants.AirResistance @bind:event="oninput" />
-    <span class="ms-4">@PhysicalConstants.AirResistance</span>
-</div>
+            <div>
+                <label>Min Speed</label>
+                <input class="mx-3" type="range" min="1" max="50" step="1" @bind=PhysicalConstants.MinimumSpeed @bind:event="oninput" />
+                <span class="ms-4">@PhysicalConstants.MinimumSpeed</span>
+            </div>
+            <div>
+                <label>Max Speed</label>
+                <input class="mx-3" type="range" min="5" max="100" step="1" @bind=PhysicalConstants.MaximumSpeed @bind:event="oninput" />
+                <span class="ms-4">@PhysicalConstants.MaximumSpeed</span>
+            </div>
 
-<div>
-    <label>Gravity?</label>
-    <input class="mx-3" type="range" min="0" max="100" step="1" @bind=PhysicalConstants.GravitationalStrength @bind:event="oninput" />
-    <span class="ms-4">@PhysicalConstants.GravitationalStrength</span>
-</div>
+            <div>
+                <label>Wall Elasticity</label>
+                <input class="mx-3" type="range" min="0" max="1" step="0.01" @bind=PhysicalConstants.WallElasticity @bind:event="oninput" />
+                <span class="ms-4">@PhysicalConstants.WallElasticity</span>
+            </div>
 
-<div>
-    <button @onclick="ClearBalls">Clear All Balls</button>
-    <button @onclick="AddBall">Add Random Ball</button>
-</div>
+            <div>
+                <label>Air Resistance</label>
+                <input class="mx-3" type="range" min="0" max="0.0001" step="0.0000001" @bind=PhysicalConstants.AirResistance @bind:event="oninput" />
+                <span class="ms-4">@PhysicalConstants.AirResistance</span>
+            </div>
 
-
-<CanvasHelper @ref="_canvasHelper"
-              CanvasResized="CanvasResized"
-              RenderFrame="RenderFrame"
-              MouseDown="MouseDown"
-              MouseUp="MouseUp"
-              MouseMove="MouseMove">
-
-    <BECanvas @ref="_canvasReference"></BECanvas>
-
-</CanvasHelper>
+            <div>
+                <label>Gravity</label>
+                <input class="mx-3" type="range" min="0" max="100" step="1" @bind=PhysicalConstants.GravitationalStrength @bind:event="oninput" />
+                <span class="ms-4">@PhysicalConstants.GravitationalStrength</span>
+            </div>
+        </div>
+        <div class="buttons">
+            <button @onclick="ClearBalls">Clear All Balls</button>
+            <button @onclick="AddBall">Add Random Ball</button>
+        </div>
+    </div>
+</section>
 
 @code {
     private Ballfield _ballfield = new Ballfield();
@@ -118,10 +126,25 @@
         }
     }
 
-    public void UpdateForeground()
+    public async Task RenderFrame(double fps)
+    {
+        _fps = fps;
+
+        await UpdateBackground();
+
+        PerformMainCalculations();
+
+        DrawBalls();
+
+        await ClearOutterBackground();
+
+    }
+
+    #region PhysicsMethods
+    private void CalculateTouchedBalls()
     {
         // Physics for touched balls
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < _touchedBalls.Count; i++) //might need to change to 10
         {
             if (_touchedBalls[i] >= 0)
             {
@@ -139,6 +162,11 @@
                 }
             }
         }
+    }
+
+    private void PerformMainCalculations()
+    {
+        CalculateTouchedBalls();
 
         // Main physics
         for (int t = 0; t < PhysicalConstants.TimeStep; t++)
@@ -207,7 +235,11 @@
             BallPhysics.CheckDistance(_ballfield);
         }
 
-        // Drawing + Gravity
+        CalculateGravity();
+    }
+
+    private void CalculateGravity()
+    {
         for (var i = 0; i < NumberOfBalls; i++)
         {
             Ball currentBall = _ballfield.Balls[i];
@@ -217,31 +249,6 @@
                 currentBall.Velocity.X += _deviceTiltX * PhysicalConstants.GravitationalStrength;
                 currentBall.Velocity.Y += _deviceTiltY * PhysicalConstants.GravitationalStrength;
             }
-            switch (currentBall.Mode)
-            {
-                case 0:
-                    DrawBall(currentBall);
-                    break;
-                case 1:
-                    DrawBall(currentBall);
-                    break;
-                case 2: //Add support of different balls
-                    DrawBall(currentBall);
-                    //if (i != 0)
-                    //{
-                    //
-                    //
-                    //}
-                    break;
-                case 3:
-                    //this.drawBall(this.x[i], this.y[i]);
-                    //if (i != 0)
-                    //{
-                    //
-                    //
-                    //}
-                    break;
-            }
         }
     }
 
@@ -250,34 +257,9 @@
         this._deviceTiltX = -0.1 * a.X;
         this._deviceTiltY = 0.1 * a.Y;
     }
+    #endregion
 
-    private async Task DrawBall(Ball ball)
-    {
-        await this._canvasContext.BeginBatchAsync();
-
-        await this._canvasContext.SetStrokeStyleAsync(ball.Color); // contour
-        await this._canvasContext.BeginPathAsync();
-        await this._canvasContext.ArcAsync(ball.X, ball.Y, ball.Radius, 0, 2 * Math.PI);
-        await this._canvasContext.SetFillStyleAsync(ball.Color); // fill
-        await this._canvasContext.FillAsync();
-
-        await this._canvasContext.StrokeAsync();
-
-        await this._canvasContext.EndBatchAsync();
-    }
-
-    public async Task RenderFrame(double fps)
-    {
-        _fps = fps;
-
-        await UpdateBackground();
-
-        UpdateForeground();
-
-        await ClearOutterBackground();
-
-    }
-
+    #region CanvasMethods
     private async Task UpdateBackground()
     {
         await this._canvasContext.BeginBatchAsync();
@@ -310,7 +292,7 @@
     public void CanvasResized(Size size)
     {
         _size = size;
-        _ballfield.Resize(size.Width * 0.6, size.Height * 0.6);
+        _ballfield.Resize(size.Width, size.Height);
     }
 
     // Handle mouse down events
@@ -329,6 +311,57 @@
     void MouseMove(CanvasMouseArgs args)
     {
 
+    }
+    #endregion
+
+    #region BallsMethods
+    public void DrawBalls()
+    {
+        for (var i = 0; i < NumberOfBalls; i++)
+        {
+            Ball currentBall = _ballfield.Balls[i];
+
+            switch (currentBall.Mode)
+            {
+                case 0:
+                    DrawBall(currentBall);
+                    break;
+                case 1:
+                    DrawBall(currentBall);
+                    break;
+                case 2: //Add support of different balls
+                    DrawBall(currentBall);
+                    //if (i != 0)
+                    //{
+                    //
+                    //
+                    //}
+                    break;
+                case 3:
+                    DrawBall(currentBall);
+                    //if (i != 0)
+                    //{
+                    //
+                    //
+                    //}
+                    break;
+            }
+        }
+    }
+
+    private async Task DrawBall(Ball ball)
+    {
+        await this._canvasContext.BeginBatchAsync();
+
+        await this._canvasContext.SetStrokeStyleAsync(ball.Color); // contour
+        await this._canvasContext.BeginPathAsync();
+        await this._canvasContext.ArcAsync(ball.X, ball.Y, ball.Radius, 0, 2 * Math.PI);
+        await this._canvasContext.SetFillStyleAsync(ball.Color); // fill
+        await this._canvasContext.FillAsync();
+
+        await this._canvasContext.StrokeAsync();
+
+        await this._canvasContext.EndBatchAsync();
     }
 
     private async Task ClearBalls()
@@ -349,4 +382,5 @@
         _touchY.Add(0);
         _touchYAfter.Add(0);
     }
+    #endregion
 }

@@ -1,0 +1,25 @@
+﻿@inject IJSRuntime jsRuntime
+
+@using PatSite.Client.Models
+
+@page "/facebookSpam"
+<section class="wrapper style2 fullscreen">
+    <h3>Facebook Spam</h3>
+
+    <EditForm Model="@_loginModel">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <InputText type="email" placeholder="Email" @bind-Value="@_loginModel.Email" />
+        <InputText type="password" placeholder="Password" @bind-Value="@_loginModel.Password" />
+    </EditForm>
+</section>
+@code {
+    private FacebookLoginModel _loginModel = new FacebookLoginModel();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+        }
+    }
+}

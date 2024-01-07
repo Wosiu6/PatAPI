@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatAPI", "PatAPI\PatAPI.csproj", "{433EEC9A-9346-4281-92D6-05C7CE0D942C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{0943A7E8-68CF-4359-837B-E6565060DB28}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatSite.Server", "PatSite\Server\PatSite.Server.csproj", "{2E4F0FBD-EB22-4AB5-8CBD-CC23677B948D}"
@@ -19,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{433EEC9A-9346-4281-92D6-05C7CE0D942C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{433EEC9A-9346-4281-92D6-05C7CE0D942C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{433EEC9A-9346-4281-92D6-05C7CE0D942C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{433EEC9A-9346-4281-92D6-05C7CE0D942C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0943A7E8-68CF-4359-837B-E6565060DB28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0943A7E8-68CF-4359-837B-E6565060DB28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0943A7E8-68CF-4359-837B-E6565060DB28}.Release|Any CPU.ActiveCfg = Release|Any CPU

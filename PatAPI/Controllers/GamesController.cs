@@ -15,9 +15,6 @@ namespace PatAPI.Controllers
             _logger = logger;
             _gamesService = gamesService;
         }
-
-        
-
         private async Task<IActionResult> HandleRequest(Func<Task<IActionResult>> action, string errorMessage)
         {
             try

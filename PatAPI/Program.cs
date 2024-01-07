@@ -1,4 +1,5 @@
 using Infrastructure.Constants;
+using Microsoft.OpenApi.Models;
 using PatAPI.Configuration;
 using PatAPI.Handlers;
 using PatAPI.Services;
