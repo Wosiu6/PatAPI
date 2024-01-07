@@ -144,24 +144,30 @@
     private void CalculateTouchedBalls()
     {
         // Physics for touched balls
-        for (var i = 0; i < _touchedBalls.Count; i++) //might need to change to 10
+        for (var i = 0; i < _touchedBalls.Count; i++)
         {
-            if (_touchedBalls[i] >= 0)
+            if (_touchedBalls[i] < 0)
+                continue;
+
+            _touchXAfter[i] = _touchX[i];
+            _touchYAfter[i] = _touchY[i];
+
+            var ball = _ballfield.Balls[i];
+
+            if (ball.Mode != 1)
             {
-                _touchXAfter[i] = _touchX[i];
-                _touchYAfter[i] = _touchY[i];
-                if (_ballfield.Balls[i].Mode != 1)
-                {
-                    _ballfield.Balls[i].Velocity.X = -0.5 * (_ballfield.Balls[i].X - _touchXAfter[i]) / this._deltaT / 10.0;
-                    _ballfield.Balls[i].Velocity.Y = -0.5 * (_ballfield.Balls[i].Y - _touchYAfter[i]) / this._deltaT / 10.0;
-                }
-                else
-                {
-                    _ballfield.Balls[i].X = _touchX[i];
-                    _ballfield.Balls[i].Y = _touchY[i];
-                }
+                var factor = -0.5 / this._deltaT / 10.0;
+
+                ball.Velocity.X = factor * (ball.X - _touchXAfter[i]);
+                ball.Velocity.Y = factor * (ball.Y - _touchYAfter[i]);
+            }
+            else
+            {
+                ball.X = _touchX[i];
+                ball.Y = _touchY[i];
             }
         }
+
     }
 
     private void PerformMainCalculations()
@@ -177,77 +183,104 @@
 
                 if (currentBall.Mode != 1)
                 {
+                    // Update position based on velocity
                     currentBall.X += currentBall.Velocity.X * _deltaT;
                     currentBall.Y += currentBall.Velocity.Y * _deltaT;
+
+                    // Apply air resistance
+                    currentBall.Velocity.X -= currentBall.Velocity.X * PhysicalConstants.AirResistance;
+                    currentBall.Velocity.Y -= currentBall.Velocity.Y * PhysicalConstants.AirResistance;
+
+                    // Reflect off walls
+                    ReflectOffWalls(currentBall);
                 }
                 else
                 {
+                    // Stop the ball if it's in mode 1
                     currentBall.Velocity.X = 0;
                     currentBall.Velocity.Y = 0;
                 }
 
-                double deltaX, deltaY;
-
-                if (currentBall.Mode == 3 && i != 0)
-                {
-                    Ball previousBall = _ballfield.Balls[i - 1];
-
-                    deltaX = currentBall.X - previousBall.X;
-                    deltaY = currentBall.Y - previousBall.Y;
-                    currentBall.Velocity.X -= 0.3 / currentBall.Radius * (deltaX - 2 * currentBall.Radius * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
-                    currentBall.Velocity.Y -= 0.3 / currentBall.Radius * (deltaY - 2 * currentBall.Radius * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
-                }
-                if (currentBall.Mode != 1 && i != NumberOfBalls - 1 && _ballfield.Balls[i + 1].Mode == 3)
-                {
-                    Ball nextBall = _ballfield.Balls[i + 1];
-
-                    deltaX = currentBall.X - nextBall.X;
-                    deltaY = currentBall.Y - nextBall.Y;
-                    currentBall.Velocity.X -= 0.3 / currentBall.Radius * (deltaX - 2 * currentBall.Radius * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
-                    currentBall.Velocity.Y -= 0.3 / currentBall.Radius * (deltaY - 2 * currentBall.Radius * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
-                }
-
-                currentBall.Velocity.X -= currentBall.Velocity.X * PhysicalConstants.AirResistance;
-                currentBall.Velocity.Y -= currentBall.Velocity.Y * PhysicalConstants.AirResistance;
-
-                if (currentBall.X + currentBall.Radius > _ballfield.Width)
-                {
-                    currentBall.Velocity.X *= -PhysicalConstants.WallElasticity;
-                    currentBall.X = _ballfield.Width - currentBall.Radius;
-                }
-                else if (currentBall.X - currentBall.Radius < 0)
-                {
-                    currentBall.Velocity.X *= -PhysicalConstants.WallElasticity;
-                    currentBall.X = currentBall.Radius;
-                }
-                if (currentBall.Y + currentBall.Radius > _ballfield.Height)
-                {
-                    currentBall.Velocity.Y *= -PhysicalConstants.WallElasticity;
-                    currentBall.Y = _ballfield.Height - currentBall.Radius;
-                }
-                else if (currentBall.Y - currentBall.Radius < 0)
-                {
-                    currentBall.Velocity.Y *= -PhysicalConstants.WallElasticity;
-                    currentBall.Y = currentBall.Radius;
-                }
+                // Ball interactions with other balls
+                ApplyBallInteractions(i);
             }
 
+            // Check distances between balls
             BallPhysics.CheckDistance(_ballfield);
         }
 
         CalculateGravity();
     }
 
+    // Function to reflect the ball off the walls
+    void ReflectOffWalls(Ball currentBall)
+    {
+        if (currentBall.X + currentBall.Radius > _ballfield.Width)
+        {
+            currentBall.Velocity.X *= -PhysicalConstants.WallElasticity;
+            currentBall.X = _ballfield.Width - currentBall.Radius;
+        }
+        else if (currentBall.X - currentBall.Radius < 0)
+        {
+            currentBall.Velocity.X *= -PhysicalConstants.WallElasticity;
+            currentBall.X = currentBall.Radius;
+        }
+
+        if (currentBall.Y + currentBall.Radius > _ballfield.Height)
+        {
+            currentBall.Velocity.Y *= -PhysicalConstants.WallElasticity;
+            currentBall.Y = _ballfield.Height - currentBall.Radius;
+        }
+        else if (currentBall.Y - currentBall.Radius < 0)
+        {
+            currentBall.Velocity.Y *= -PhysicalConstants.WallElasticity;
+            currentBall.Y = currentBall.Radius;
+        }
+    }
+
+    // Function to apply interactions between the current ball and its neighbors
+    void ApplyBallInteractions(int i)
+    {
+        Ball currentBall = _ballfield.Balls[i];
+
+        double deltaX, deltaY;
+
+        if (currentBall.Mode == 3 && i != 0)
+        {
+            // Interaction with the previous ball
+            Ball previousBall = _ballfield.Balls[i - 1];
+            CalculateAndApplyInteraction(currentBall, previousBall);
+        }
+
+        if (currentBall.Mode != 1 && i != NumberOfBalls - 1 && _ballfield.Balls[i + 1].Mode == 3)
+        {
+            // Interaction with the next ball
+            Ball nextBall = _ballfield.Balls[i + 1];
+            CalculateAndApplyInteraction(currentBall, nextBall);
+        }
+    }
+
+    // Function to calculate and apply interactions between two balls
+    void CalculateAndApplyInteraction(Ball ball1, Ball ball2)
+    {
+        double deltaX = ball1.X - ball2.X;
+        double deltaY = ball1.Y - ball2.Y;
+
+        ball1.Velocity.X -= 0.3 / ball1.Radius * (deltaX - 2 * ball1.Radius * deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+        ball1.Velocity.Y -= 0.3 / ball1.Radius * (deltaY - 2 * ball1.Radius * deltaY / Math.Sqrt(deltaX * deltaX + deltaY * deltaY));
+    }
+
     private void CalculateGravity()
     {
+        var gravitationalForceX = _deviceTiltX * PhysicalConstants.GravitationalStrength;
+        var gravitationalForceY = _deviceTiltY * PhysicalConstants.GravitationalStrength;
+
         for (var i = 0; i < NumberOfBalls; i++)
         {
-            Ball currentBall = _ballfield.Balls[i];
-
-            if (currentBall.Mode != 1)
+            if (_ballfield.Balls[i].Mode != 1)
             {
-                currentBall.Velocity.X += _deviceTiltX * PhysicalConstants.GravitationalStrength;
-                currentBall.Velocity.Y += _deviceTiltY * PhysicalConstants.GravitationalStrength;
+                _ballfield.Balls[i].Velocity.X += gravitationalForceX;
+                _ballfield.Balls[i].Velocity.Y += gravitationalForceY;
             }
         }
     }
