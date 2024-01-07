@@ -1,6 +1,8 @@
 # PatSite
  Hobby project to learn more about .NET APIs and Blazor
 
+
+# Disregard the statements below for now
 ## Current Functionality
 - Search games/game by name using the public(non-public) api of HowLongToBeat.com
 - Search game by the HowLongToBeat game ID
