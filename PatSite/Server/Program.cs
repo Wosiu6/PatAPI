@@ -40,7 +40,7 @@ app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("v1/swagger.json", "v1");
+    c.SwaggerEndpoint("https://patapi20240109204434.azurewebsites.net/swagger/v1/swagger.json", "v1");
 });
 
 app.UseRouting();
