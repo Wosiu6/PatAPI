@@ -33,10 +33,9 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseSwagger();
-app.UseSwaggerUI(options =>
+app.UseSwaggerUI(c =>
 {
-    options.SwaggerEndpoint("https://patapi20240109204434.azurewebsites.net/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = string.Empty;
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
 });
 
 app.UseRouting();

@@ -19,8 +19,10 @@ namespace PatSite.Server.Configuration
             services.AddSwaggerGen(sgo =>
             {
                 ConfigureSteamApiKey(sgo);                                      /* Steam web API key auth documentation - https://partner.steamgames.com/doc/webapi_overview/auth */
-                ConfigureFacebookAccessToken(sgo);     
+                ConfigureFacebookAccessToken(sgo);
                 /* Facebook Access Token doc - https://developers.facebook.com/docs/messenger-platform/reference/send-api/#send-api-reference */
+
+                sgo.SwaggerDoc("v1", new OpenApiInfo { Title = "PatAPI", Version = "v1" });
             });
         }
 
