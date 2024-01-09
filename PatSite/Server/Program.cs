@@ -7,11 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-});
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
@@ -38,9 +33,10 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseSwagger();
-app.UseSwaggerUI(c =>
+app.UseSwaggerUI(options =>
 {
-    c.SwaggerEndpoint("https://patapi20240109204434.azurewebsites.net/swagger/v1/swagger.json", "v1");
+    options.SwaggerEndpoint("https://patapi20240109204434.azurewebsites.net/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
 });
 
 app.UseRouting();
