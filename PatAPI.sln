@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatAPI", "PatAPI\PatAPI.csproj", "{FBD28914-2DB9-4A76-8C2D-FC5E9B1C0077}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{CED61839-FFC7-4AA4-B295-DBE628500CD5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBD28914-2DB9-4A76-8C2D-FC5E9B1C0077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBD28914-2DB9-4A76-8C2D-FC5E9B1C0077}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBD28914-2DB9-4A76-8C2D-FC5E9B1C0077}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBD28914-2DB9-4A76-8C2D-FC5E9B1C0077}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CED61839-FFC7-4AA4-B295-DBE628500CD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CED61839-FFC7-4AA4-B295-DBE628500CD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CED61839-FFC7-4AA4-B295-DBE628500CD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CED61839-FFC7-4AA4-B295-DBE628500CD5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {53BB87CF-CD5A-4FA8-888E-E0BA6CD9A841}
+	EndGlobalSection
+EndGlobal
