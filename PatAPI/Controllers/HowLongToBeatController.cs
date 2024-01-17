@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using PatAPI.Services;
 
@@ -5,6 +6,7 @@ namespace PatAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [EnableCors("OpenCorsPolicy")]
     public class HowLongToBeatController : ControllerBase
     {
         private readonly ILogger<HowLongToBeatController> _logger;

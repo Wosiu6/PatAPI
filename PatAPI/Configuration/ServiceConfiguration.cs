@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
 using PatAPI.Handlers;
 using PatAPI.Infrastructure.Constants;
 using PatAPI.Services;
@@ -22,6 +23,13 @@ namespace PatAPI.Configuration
                 ConfigureFacebookAccessToken(sgo);
                 /* Facebook Access Token doc - https://developers.facebook.com/docs/messenger-platform/reference/send-api/#send-api-reference */
             });
+
+            services.AddCors(o => o.AddPolicy("OpenCorsPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
         }
 
         private static void ConfigureClients(IServiceCollection services)

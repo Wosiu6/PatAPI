@@ -11,6 +11,8 @@ ServiceConfiguration.Configure(builder.Services);
 
 var app = builder.Build();
 
+app.UseCors("OpenCorsPolicy");
+
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
@@ -19,9 +21,10 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseHttpsRedirection();
-app.UseCors();
+
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();
